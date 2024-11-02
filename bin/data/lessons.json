@@ -1,0 +1,19 @@
+{
+    "Lessons":{    
+        "Math":{
+            "id": 10,
+            "classes":[
+                    {"class": "A", "hours": 10},
+                    {"class": "B", "hours": 12},
+                    {"class": "C", "hours": 12}
+            ]
+        },
+        "English":{
+            "id": 11,
+            "classes":[
+                {"class": "A", "hours": 8},
+                {"class": "C", "hours": 9}
+            ]
+        }
+    }   
+}

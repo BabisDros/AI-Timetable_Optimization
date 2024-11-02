@@ -1,0 +1,10 @@
+{
+    "Teachers":{
+        "Papadopoulos":{
+            "id": 100,
+            "teaches": [10,11],
+            "hoursPerDay": 3,
+            "hoursPerWeek": 10
+        }
+    }
+}
