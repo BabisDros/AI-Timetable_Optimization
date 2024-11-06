@@ -1,12 +1,18 @@
+#pragma once
 #include "main.h"
 #include "chromosome.h"
 #include <iostream>
 #include <fstream>
 #include <filesystem>
 
+#define DEBUG
+
 int main (int argc, char** argv)
 {
-    int populationSize = 100;
+    std::srand(1);// set seed for testing
+    int populationSize = 10;
+    int maxGen = 20;
+
     // get json data
     std::ifstream f("data\\lessons.json");
     json lessons = json::parse(f)["Lessons"];
@@ -16,38 +22,94 @@ int main (int argc, char** argv)
     
     //id to name correlation
     std::map<int, std::string> lessonsIDs;
+    std::vector<std::pair<int, int>> lessonTeacher;
+    lessonTeacher.push_back(std::make_pair(-1,-1)); // free period
 
     for (auto lesson: lessons.items())
     {
         lessonsIDs[lesson.value()["id"]] = lesson.key();
     }
 
-    chromosome* population = new chromosome[populationSize];
-    chromosome* tempNewPopulation = new chromosome[populationSize];
+    for (auto teacher : teachers.items())
+    {
+        for (auto lesson : teacher.value()["teaches"].items())
+        {
+            lessonTeacher.push_back(std::make_pair(lesson.value(), teacher.value()["id"]));
+        }
+    }
+
+    chromosome** population = new chromosome*[populationSize];
+    chromosome** tempNewPopulation = new chromosome*[populationSize];
 
     /* initialize population with randomized values
 
     */
+    for (int i = 0; i < populationSize; i++)
+    {
+        population[i] = new chromosome(lessonTeacher);
+    }
 
+
+    #ifdef DEBUG
+        std::cout << "All pairs\n";
+        for (std::pair t : lessonTeacher)
+        {
+            std::cout << "lessons id: " << t.first << " teacher id: " << t.second << std::endl;
+        }
+    #endif // DEBUG
+
+    #ifdef DEBUG
+        std::cout << "Check curriculumn data of 1st chromosome" << std::endl;
+        for (int i = 0; i < population[0]->arrSize; i++)
+        {
+            std::cout << i << ": lesson id: " << population[0]->curriculumn[i].first << " teacher id: " << population[0]->curriculumn[i].second << std::endl;
+        }
+    #endif // DEBUG
+
+    
     /* start of loop of new generations
     
     */
+    for (int gen = 0; gen < maxGen; gen++)
+    {
 
-    /* crossbreeding
+        /* score evaluation
+        
+        */
+        for (int i = 0; i < populationSize; i++)
+        {
+            scoreCalculation(population[i]);
+        }
+
+
+
+        /* crossbreeding
+
+        */
+
+
+        /* mutation
+        
+        */
+
+
+        /* delete previous population, with allocated memory if needed
+
+        */
+
+        //population = tempNewPopulation;
+        //tempNewPopulation = nullptr;
+
+
+        /* end of loop of new generations
+
+        */
+
+
+
+    }
+
     
-    */
-
-    /* delete previous population, with allocated memory if needed
-    
-    */
-
-    population = tempNewPopulation;
-    tempNewPopulation = nullptr;
-    
-
-    /* end of loop of new generations
-
-    */
 
 
    // jsonUseExample(lessons, teachers, lessonsIDs);
@@ -79,5 +141,40 @@ void jsonUseExample(json &lessons, json &teachers, std::map<int, std::string> &l
             std::cout << "Teaches " << lessonsIDs[teaching.value()] << std::endl;
         }
     }
+}
+
+void scoreCalculation(chromosome* chrom)
+{
+    /* each lesson must appear x,y,z times for all classes, variable scoring
+    
+    */
+
+    /* each teacher can not teach more than the daily/weekly limit, static scoring
+    
+    */
+
+    /* a teacher can't be at the same time in 2 different classes, static scoring {tip: check every 35 cells, memory use recommended}
+    
+    */
+
+    /* no free periods between classes, static scoring
+    
+    */
+
+    /* a teacher shouldn't teach for more than 2 hours in a row, variable scoring
+    
+    */
+
+    /* each classes programm should be uniformly spread out throughout the week, variable scoring
+    
+    */
+
+    /* each lesson for each class should be uniformly spread out throughout the week, static scoring
+    
+    */
+
+    /* all teacher should be teacher per week around the same amount of times, variable scoring
+    
+    */
 }
 

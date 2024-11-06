@@ -5,6 +5,12 @@
             "teaches": [10,11],
             "hoursPerDay": 3,
             "hoursPerWeek": 10
+        },
+        "Makri":{
+            "id": 101,
+            "teaches": [11],
+            "hoursPerDay": 4,
+            "hoursPerWeek": 14
         }
     }
 }

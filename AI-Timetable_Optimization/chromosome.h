@@ -1,13 +1,24 @@
 #pragma once
-
+#include <cstdlib>
+#include <vector>
 
 class chromosome {
-	
-
+	int score = 10;
 public:
+	static const int arrSize = 3 * 3 * 5 * 7; // 0-6: Monday and so on, from class A1 to class C3
+
 	chromosome() {}
 
-	chromosome(int* genes1, int size1, int* genes2, int size2)
+	chromosome(std::vector<std::pair<int, int>>& lessonTeacher)
+	{
+		for (int i = 0; i < arrSize; i++)
+		{
+			int rand = std::rand();
+			curriculumn[i] = lessonTeacher[rand % lessonTeacher.size()];
+		}
+	}
+
+	chromosome(std::pair<int, int>* genes1, int size1, std::pair<int, int>* genes2, int size2)
 	{
 		for (int i = 0; i < size1; i++)
 		{
@@ -20,5 +31,8 @@ public:
 		}
 	}	
 
-	int curriculumn[5 * 7]; // 0-6: Monday and so on 
+	std::pair<int, int> curriculumn[arrSize];
+	
+	void addScore(int score);
+	int getScore();
 };
