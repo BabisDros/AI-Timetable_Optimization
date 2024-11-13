@@ -2,7 +2,7 @@
 
 void chromosome::addScore(int score)
 {
-	score += score;
+	this->score += score;
 }
 
 int chromosome::getScore()
