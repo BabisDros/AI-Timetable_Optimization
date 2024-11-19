@@ -1,145 +1,145 @@
 {
     "Lessons":{
-        "Greek":{
-            "id": 10,
+        "10":{
+            "name": "Greek",
             "classes":[
                     {"year": "A", "hours": 3},
                     {"year": "B", "hours": 2},
                     {"year": "C", "hours": 2}
             ]
         },
-        "Literature":{
-            "id": 11,
+        "11":{
+            "name": "Literature",
             "classes":[
                     {"year": "A", "hours": 2},
                     {"year": "B", "hours": 2},
                     {"year": "C", "hours": 2}
             ]
         },
-        "Ancient Greek":{
-            "id": 12,
+        "12":{
+            "name": "Ancient Greek",
             "classes":[
                     {"year": "A", "hours": 2},
                     {"year": "B", "hours": 2},
                     {"year": "C", "hours": 2}
             ]
         },
-        "Math":{
-            "id": 13,
+        "13":{
+            "name": "Math",
             "classes":[
                     {"year": "A", "hours": 4},
                     {"year": "B", "hours": 4},
                     {"year": "C", "hours": 4}
             ]
         },
-        "Physics":{
-            "id": 14,
+        "14":{
+            "name": "Physics",
             "classes":[
                     {"year": "A", "hours": 1},
                     {"year": "B", "hours": 2},
                     {"year": "C", "hours": 2}
             ]
         },
-        "Chemistry":{
-            "id": 15,
+        "15":{
+            "name": "Chemistry",
             "classes":[
                     {"year": "B", "hours": 1},
                     {"year": "C", "hours": 1}
             ]
         },
-        "Biology":{
-            "id": 16,
+        "16":{
+            "name": "Biology",
             "classes":[
                     {"year": "A", "hours": 1},
                     {"year": "B", "hours": 1},
                     {"year": "C", "hours": 1}
             ]
         },
-        "Geography":{
-            "id": 17,
+        "17":{
+            "name": "Geography",
             "classes":[
                     {"year": "A", "hours": 1},
                     {"year": "B", "hours": 2}
             ]
         },
-        "History":{
-            "id": 18,
+        "18":{
+            "name": "History",
             "classes":[
                     {"year": "A", "hours": 2},
                     {"year": "B", "hours": 2},
                     {"year": "C", "hours": 2}
             ]
         },
-        "Relision":{
-            "id": 19,
+        "19":{
+            "name": "Religion",
             "classes":[
                     {"year": "A", "hours": 2},
                     {"year": "B", "hours": 2},
                     {"year": "C", "hours": 2}
             ]
         },
-        "English":{
-            "id": 20,
+        "20":{
+            "name": "English",
             "classes":[
                     {"year": "A", "hours": 2},
                     {"year": "B", "hours": 2},
                     {"year": "C", "hours": 2}
             ]
         },
-        "Second Foreign Language":{
-            "id": 21,
+        "21":{
+            "name": "Second Foreign Language",
             "classes":[
                     {"year": "A", "hours": 2},
                     {"year": "B", "hours": 2},
                     {"year": "C", "hours": 2}
             ]
         },
-        "Social & Political Education":{
-            "id": 22,
+        "22":{
+            "name": "Social & Political Education",
             "classes":[
                     {"year": "C", "hours": 3}
             ]
         },
-        "Home Economics":{
-            "id": 23,
+        "23":{
+            "name": "Home Economics",
             "classes":[
                     {"year": "A", "hours": 1}
             ]
         },
-        "Physical Exercise":{
-            "id": 24,
+        "24":{
+            "name": "Physical Exercise",
             "classes":[
                     {"year": "A", "hours": 2},
                     {"year": "B", "hours": 2},
                     {"year": "C", "hours": 2}
             ]
         },
-        "Technology":{
-            "id": 25,
+        "25":{
+            "name": "Technology",
             "classes":[
                     {"year": "A", "hours": 1},
                     {"year": "B", "hours": 1},
                     {"year": "C", "hours": 1}
             ]
         },
-        "Computer Science":{
-            "id": 26,
+        "26":{
+            "name": "Computer Science",
             "classes":[
                     {"year": "A", "hours": 2},
                     {"year": "B", "hours": 1},
                     {"year": "C", "hours": 1}
             ]
         },
-        "Music":{
-            "id": 27,
+        "27":{
+            "name": "Music",
             "classes":[
                     {"year": "A", "hours": 1},
                     {"year": "B", "hours": 1},
                     {"year": "C", "hours": 1}
             ]
         },
-        "Arts & Crafts":{
-            "id": 28,
+        "28":{
+            "name": "Arts & Crafts",
             "classes":[
                     {"year": "A", "hours": 1},
                     {"year": "B", "hours": 1},

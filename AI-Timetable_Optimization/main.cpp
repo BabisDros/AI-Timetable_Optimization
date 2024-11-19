@@ -5,7 +5,7 @@
 #include <fstream>
 #include <filesystem>
 
-//#define DEBUG
+#define DEBUG
 
 int main (int argc, char** argv)
 {
@@ -20,21 +20,15 @@ int main (int argc, char** argv)
     f.open("data\\teachers.json");
     json teachers = json::parse(f)["Teachers"];
     
-    //id to name correlation
-    std::map<int, std::string> lessonsIDs;
     std::vector<std::pair<int, int>> lessonTeacher;
     lessonTeacher.push_back(std::make_pair(-1,-1)); // free period
 
-    for (auto lesson: lessons.items())
-    {
-        lessonsIDs[lesson.value()["id"]] = lesson.key();
-    }
 
     for (auto teacher : teachers.items())
     {
         for (auto lesson : teacher.value()["teaches"].items())
         {
-            lessonTeacher.push_back(std::make_pair(lesson.value(), teacher.value()["id"]));
+            lessonTeacher.push_back(std::make_pair(stoi( (std::string) lesson.value()), stoi(teacher.key())));
         }
     }
 
@@ -108,21 +102,17 @@ int main (int argc, char** argv)
     
 
 
-   // jsonUseExample(lessons, teachers, lessonsIDs);
+    //jsonUseExample(lessons, teachers);
 
 }
 
-void jsonUseExample(json &lessons, json &teachers, std::map<int, std::string> &lessonsIDs)
+void jsonUseExample(json &lessons, json &teachers)
 {
-    std::map<int, std::string>::iterator itr;
-    for (itr = lessonsIDs.begin(); itr != lessonsIDs.end(); itr++)
-    {
-        std::cout << "Name: " << itr->second << " ID: " << itr->first << std::endl;
-    }
+
 
     for (auto lesson : lessons.items())
     {
-        std::cout << lesson.key() << std::endl;
+        std::cout << lesson.value()["name"] << std::endl;
         for (auto classYear : lesson.value()["classes"].items())
         {
             std::cout << "Year: " << classYear.value()["year"] << " hours: " << classYear.value()["hours"] << std::endl;
@@ -131,10 +121,11 @@ void jsonUseExample(json &lessons, json &teachers, std::map<int, std::string> &l
 
     for (auto teacher : teachers.items())
     {
-        std::cout << teacher.key() << " has id " << teacher.value()["id"] << std::endl;
+        std::cout << teacher.key() << " is named " << teacher.value()["name"] << std::endl;
         for (auto teaching : teacher.value()["teaches"].items())
         {
-            std::cout << "Teaches " << lessonsIDs[teaching.value()] << std::endl;
+            //std::cout << "Teaches " << lessons[teaching.value()]["name"] << std::endl;
+            std::cout << "Teaches " << lessons[teaching.value()]["name"] << std::endl;
         }
     }
 }
@@ -156,31 +147,32 @@ void scoreCalculation(chromosome* chrom, json& lessons, json& teachers)
             year++;
         if (i % 35 == 0) // class change
         {                  
-            for (auto lesson : lessons)
+            for (auto lesson : lessons.items())
             {
                 added = false;
-                for (int k = 0; k < lesson["classes"].size(); k++)
+                for (int k = 0; k < lesson.value()["classes"].size(); k++)
                 {
-                    if (lesson["classes"][k]["year"] == classYear[year])
+                    if (lesson.value()["classes"][k]["year"] == classYear[year])
                     {
-                        counter.insert({(int)lesson["id"], (int)lesson["classes"][k]["hours"]}); // times it must appear
+                        counter.insert({stoi(lesson.key()), (int)lesson.value()["classes"][k]["hours"]}); // times it must appear
                         added = true;
                         break;
                     }
                 }
                 if (!added)
-                    counter.insert({ (int)lesson["id"], -1000}); // does not appear in year
+                    counter.insert({ stoi(lesson.key()), 0}); // does not appear in year
             }
         }
 
 
-        if (chrom->curriculumn[i].first != -1)
+        if (chrom->curriculumn[i].first != -1) // ignore free period
         { 
             counter[chrom->curriculumn[i].first] -= 1;
         }
         
         if (i % 35 == 34)
         {
+            std::cout << "Year: " << year + 1 << " Class: " << (i/35) % 3 + 1 << std::endl;
             for (auto it = counter.begin(); it != counter.end(); it++)
             {
                 #ifdef DEBUG
@@ -222,8 +214,47 @@ void scoreCalculation(chromosome* chrom, json& lessons, json& teachers)
 
     /* each teacher can not teach more than the daily/weekly limit, static scoring
     
-    */
+    
+    std::map <int, std::pair<int, int>> teacherDayWeek;
 
+    for (auto teacher : teachers.items())
+    {
+        teacherDayWeek.insert({ stoi(teacher.key()),
+            std::make_pair( (int)teacher.value()["hoursPerDay"], (int)teacher.value()["hoursPerWeek"] )});
+    }
+
+    int hour = 0;
+    int classvar = 0;
+    for (int i = 0; i < chrom->arrSize; i++)
+    {
+        if (chrom->curriculumn[hour + classvar].second != -1) // ignore free period
+        {
+            teacherDayWeek[chrom->curriculumn[hour + classvar].second].first -= 1;
+            teacherDayWeek[chrom->curriculumn[hour + classvar].second].second -= 1;
+        }
+
+
+        hour++;
+
+        if (hour >= 7)
+        { 
+            hour = 0;
+            classvar += 35; // same day, next class
+        }
+
+        if (classvar >= chrom->arrSize) // use data, go next day
+        {
+            int counter = 0;
+            for (auto itr = teacherDayWeek.begin(); itr != teacherDayWeek.end(); itr++)
+            {
+                if (itr->second.first < 0)
+                    counter++;
+               // itr->second.first = teachers
+            }
+
+        }
+    }
+*/
     /* a teacher can't be at the same time in 2 different classes, static scoring {tip: check every 35 cells, memory use recommended}
     
     */
