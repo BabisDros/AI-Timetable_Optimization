@@ -124,7 +124,6 @@ void jsonUseExample(json &lessons, json &teachers)
         std::cout << teacher.key() << " is named " << teacher.value()["name"] << std::endl;
         for (auto teaching : teacher.value()["teaches"].items())
         {
-            //std::cout << "Teaches " << lessons[teaching.value()]["name"] << std::endl;
             std::cout << "Teaches " << lessons[teaching.value()]["name"] << std::endl;
         }
     }
@@ -135,11 +134,12 @@ void scoreCalculation(chromosome* chrom, json& lessons, json& teachers)
     /* each lesson must appear x,y,z times for all classes, variable scoring
     
     */
-    std::map <int, int> counter;
+    std::map <int, int> counterLH; // hold hours for each lesson
     std::string classYear[3] = { "A", "B", "C" };
     int year = -1;
     bool added;
     int evalVariance = 0;
+    int total = 0;
 
     for (int i = 0; i < chrom->arrSize; i++)
     {
@@ -154,26 +154,28 @@ void scoreCalculation(chromosome* chrom, json& lessons, json& teachers)
                 {
                     if (lesson.value()["classes"][k]["year"] == classYear[year])
                     {
-                        counter.insert({stoi(lesson.key()), (int)lesson.value()["classes"][k]["hours"]}); // times it must appear
+                        counterLH.insert({stoi(lesson.key()), (int)lesson.value()["classes"][k]["hours"]}); // times it must appear
                         added = true;
                         break;
                     }
                 }
                 if (!added)
-                    counter.insert({ stoi(lesson.key()), 0}); // does not appear in year
+                    counterLH.insert({ stoi(lesson.key()), 0}); // does not appear in year
             }
         }
 
 
         if (chrom->curriculumn[i].first != -1) // ignore free period
         { 
-            counter[chrom->curriculumn[i].first] -= 1;
+            counterLH[chrom->curriculumn[i].first] -= 1;
         }
         
         if (i % 35 == 34)
         {
-            std::cout << "Year: " << year + 1 << " Class: " << (i/35) % 3 + 1 << std::endl;
-            for (auto it = counter.begin(); it != counter.end(); it++)
+            #ifdef DEBUG
+                std::cout << "Year: " << year + 1 << " Class: " << (i/35) % 3 + 1 << " | ";
+            #endif // DEBUG
+            for (auto it = counterLH.begin(); it != counterLH.end(); it++)
             {
                 #ifdef DEBUG
                     std::cout << it->second << " | ";
@@ -184,6 +186,7 @@ void scoreCalculation(chromosome* chrom, json& lessons, json& teachers)
                     evalVariance += 1;
                 else
                     evalVariance -= 1;
+                total++;
             }
 
             #ifdef DEBUG
@@ -191,48 +194,54 @@ void scoreCalculation(chromosome* chrom, json& lessons, json& teachers)
             #endif // DEBUG
             
 
-
             if (evalVariance <= -50)
                 chrom->addScore(1);
             else if (evalVariance <= -10)
                 chrom->addScore(5);
             else if (evalVariance <= 0)
                 chrom->addScore(10);
-            else if (evalVariance <= 10)
+            else if (evalVariance <= total*0.3)
                 chrom->addScore(30);
-            else if (evalVariance <= 50)
+            else if (evalVariance <= total*0.5)
                 chrom->addScore(80);
-            else if (evalVariance <= 100)
+            else if (evalVariance <= total*0.8)
                 chrom->addScore(200);
-            else
+            else if (evalVariance < total)
                 chrom->addScore(400);
-           
-            counter.clear();
+            else if (evalVariance == total) // all lessons appear the specified hours
+                chrom->addScore(10000);
+
+            counterLH.clear();
         }
     }
     
 
     /* each teacher can not teach more than the daily/weekly limit, static scoring
     
-    
-    std::map <int, std::pair<int, int>> teacherDayWeek;
-
+    */
+    std::map <std::string, std::pair<int, int>> teacherDayWeek;
+    total = 0;
     for (auto teacher : teachers.items())
     {
-        teacherDayWeek.insert({ stoi(teacher.key()),
+        teacherDayWeek.insert({teacher.key(),
             std::make_pair( (int)teacher.value()["hoursPerDay"], (int)teacher.value()["hoursPerWeek"] )});
     }
 
     int hour = 0;
     int classvar = 0;
+    int counter = 0;
     for (int i = 0; i < chrom->arrSize; i++)
     {
+        #ifdef DEBUG
+        std::cout << "Now teaches: " << chrom->curriculumn[hour + classvar].second <<std::endl;
+        std::cout << "i: " << i << " cell: " << hour + classvar << std::endl;
+        #endif // DEBUG
+
         if (chrom->curriculumn[hour + classvar].second != -1) // ignore free period
         {
-            teacherDayWeek[chrom->curriculumn[hour + classvar].second].first -= 1;
-            teacherDayWeek[chrom->curriculumn[hour + classvar].second].second -= 1;
+            teacherDayWeek[std::to_string(chrom->curriculumn[hour + classvar].second)].first -= 1;
+            teacherDayWeek[std::to_string(chrom->curriculumn[hour + classvar].second)].second -= 1;
         }
-
 
         hour++;
 
@@ -241,20 +250,47 @@ void scoreCalculation(chromosome* chrom, json& lessons, json& teachers)
             hour = 0;
             classvar += 35; // same day, next class
         }
-
+        
         if (classvar >= chrom->arrSize) // use data, go next day
         {
-            int counter = 0;
             for (auto itr = teacherDayWeek.begin(); itr != teacherDayWeek.end(); itr++)
             {
+                #ifdef DEBUG
+                    std::cout << itr->first << " can teach " << itr->second.first << " more hours" << std::endl;
+                #endif // DEBUG
                 if (itr->second.first < 0)
                     counter++;
-               // itr->second.first = teachers
-            }
+                total++;
 
+                itr->second.first = teachers[itr->first]["hoursPerDay"]; //reset value
+            }
+            classvar = (classvar + 7) % 35;
         }
     }
-*/
+
+    for (auto itr = teacherDayWeek.begin(); itr != teacherDayWeek.end(); itr++)
+    {
+        if (itr->second.second < 0)
+            counter++; // or more
+        total++;// increase by same amount
+    }
+ 
+    if (counter == 0)
+        chrom->addScore(10000);
+    else if (counter <= total*0.05)
+        chrom->addScore(1000);
+    else if (counter <= total*0.2)
+        chrom->addScore(400);
+    else if (counter <= total*0.4)
+        chrom->addScore(200);
+    else if (counter <= total*0.7)
+        chrom->addScore(50);
+    else if (counter <= total*0.85)
+        chrom->addScore(10);
+    else if (counter == total)
+        chrom->addScore(1);
+
+
     /* a teacher can't be at the same time in 2 different classes, static scoring {tip: check every 35 cells, memory use recommended}
     
     */
