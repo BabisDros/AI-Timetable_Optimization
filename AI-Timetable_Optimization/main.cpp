@@ -1,14 +1,17 @@
 #pragma once
 #include "main.h"
-#include "chromosome.h"
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <random>
 
-#define DEBUG
+//#define DEBUG
 
 int main (int argc, char** argv)
 {
+    std::random_device                  rand_dev;
+    std::mt19937                        generator(1);// seed
+    std::uniform_int_distribution<>     distr(1, INT_MAX); //big number rand
     std::srand(1);// set seed for testing
     int populationSize = 10;
     int maxGen = 20;
@@ -33,7 +36,8 @@ int main (int argc, char** argv)
     }
 
     chromosome** population = new chromosome*[populationSize];
-    chromosome** tempNewPopulation = new chromosome*[populationSize];
+    chromosome** newPopulation = new chromosome*[populationSize];
+    chromosome** tempPopulationPtr = nullptr;
 
     /* initialize population with randomized values
 
@@ -66,44 +70,88 @@ int main (int argc, char** argv)
         /* score evaluation
         
         */
+        int totalScore = 0;
         for (int i = 0; i < populationSize; i++)
         {
             scoreCalculation(population[i], lessons, teachers);
+            totalScore += population[i]->getScore();
+            population[i]->setDistribution(totalScore);
         }
 
 
 
-        /* crossbreeding
+        /* crossbreeding and mutation
 
         */
 
+        int comparator;
+        for (int i = 0; i < populationSize/2; i++)
+        {
+            comparator = distr(generator)% totalScore;
+            chromosome* par1 = (*std::upper_bound(population, population + populationSize - 1, comparator, chromosome::compareDistributionVal));
+           #ifdef DEBUG
+                std::cout << "Comp: " << comparator << " |  Score: " << par1->getScore() << " with dis: " << par1->getDistribution() << std::endl;
+           #endif // DEBUG
 
-        /* mutation
-        
-        */
+            comparator = distr(generator)% totalScore;
+            chromosome* par2 = (*std::upper_bound(population, population + populationSize - 1, comparator, chromosome::compareDistributionVal));
+            #ifdef DEBUG
+                std::cout << "Comp: " << comparator << " |  Score: " << par2->getScore() << " with dis: " << par2->getDistribution() << std::endl;
+            #endif // DEBUG        
+            int size = distr(generator)% par1->arrSize;
+            newPopulation[i] = new chromosome(par1->curriculumn, size, par2->curriculumn);
+            newPopulation[populationSize / 2 + i] = new chromosome(par2->curriculumn, size, par1->curriculumn);
+
+            for (int j = 0; j < par1->arrSize; j++)
+            {
+                if (distr(generator) < INT_MAX * 0.15)
+                    newPopulation[i]->curriculumn[j] = lessonTeacher[distr(generator) % lessonTeacher.size()];
+                
+                if (distr(generator) < INT_MAX * 0.15) 
+                    newPopulation[populationSize / 2 + i]->curriculumn[j] = lessonTeacher[distr(generator) % lessonTeacher.size()];   
+            }
+        }
+
 
 
         /* delete previous population, with allocated memory if needed
 
         */
+        for (int i = 0; i < populationSize; i++)
+        {
+            if (population[i] == NULL) continue;
+            delete population[i];
+        }
 
-        //population = tempNewPopulation;
-        //tempNewPopulation = nullptr;
-
-
-        /* end of loop of new generations
-
-        */
-
-
+        tempPopulationPtr = population;
+        population = newPopulation;
+        newPopulation = tempPopulationPtr;
 
     }
 
-    
+    // print Best
+    chromosome* bestGenes = population[0];
+    for (int i = 0; i < populationSize; i++)
+    {
+        scoreCalculation(population[i], lessons, teachers);
+        if (bestGenes->getScore() > population[i]->getScore()) continue;
+        bestGenes = population[i];
+    }
+
+
 
 
     //jsonUseExample(lessons, teachers);
 
+    //Memory cleanup
+    for (int i = 0; i < populationSize; i++)
+    {
+        if (population[i] == NULL) continue;
+        delete population[i];
+    }
+    delete[] population;
+    delete[] newPopulation;
+    
 }
 
 void jsonUseExample(json &lessons, json &teachers)
@@ -192,7 +240,7 @@ void scoreCalculation(chromosome* chrom, json& lessons, json& teachers)
             #ifdef DEBUG
                 std::cout << std::endl;
             #endif // DEBUG
-            
+
 
             if (evalVariance <= -50)
                 chrom->addScore(1);

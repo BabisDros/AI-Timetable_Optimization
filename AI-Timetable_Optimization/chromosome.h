@@ -4,6 +4,7 @@
 
 class chromosome {
 	int score = 10;
+	int distribution = 0;
 public:
 	static const int arrSize = 3 * 3 * 5 * 7; // 0-6: Monday and so on, from class A1 to class C3
 
@@ -18,14 +19,14 @@ public:
 		}
 	}
 
-	chromosome(std::pair<int, int>* genes1, int size1, std::pair<int, int>* genes2, int size2)
+	chromosome(std::pair<int, int>* genes1, int size1, std::pair<int, int>* genes2)
 	{
 		for (int i = 0; i < size1; i++)
 		{
 			curriculumn[i] = genes1[i];
 		}
 
-		for (int i = 0; i < size2; i++)
+		for (int i = 0; i < arrSize - size1; i++)
 		{
 			curriculumn[i + size1] = genes2[i];
 		}
@@ -34,5 +35,10 @@ public:
 	std::pair<int, int> curriculumn[arrSize];
 	
 	void addScore(int score);
-	int getScore();
+	int getScore() const;
+	void setDistribution(int val);
+	int getDistribution() const;
+
+	static bool compareDistributionVal(int val, chromosome* a);
+
 };
