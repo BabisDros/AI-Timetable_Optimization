@@ -1,9 +1,9 @@
-#pragma once
 #include "main.h"
 #include <iostream>
 #include <fstream>
 #include <filesystem>
 #include <random>
+#include <climits>
 
 //#define DEBUG
 
@@ -17,10 +17,10 @@ int main (int argc, char** argv)
     int maxGen = 20;
 
     // get json data
-    std::ifstream f("data\\lessons.json");
+    std::ifstream f("data/lessons.json");
     json lessons = json::parse(f)["Lessons"];
     f.close();
-    f.open("data\\teachers.json");
+    f.open("data/teachers.json");
     json teachers = json::parse(f)["Teachers"];
     
     std::vector<std::pair<int, int>> lessonTeacher;
