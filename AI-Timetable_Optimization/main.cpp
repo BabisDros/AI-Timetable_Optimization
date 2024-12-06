@@ -5,7 +5,7 @@
 #include <random>
 #include <climits>
 
-//#define DEBUG
+#define DEBUG
 
 int main (int argc, char** argv)
 {
@@ -53,10 +53,10 @@ int main (int argc, char** argv)
             std::cout << "lessons id: " << t.first << " teacher id: " << t.second << std::endl;
         }
 
-        std::cout << "Check curriculumn data of 1st chromosome" << std::endl;
+        std::cout << "Check curriculum data of 1st chromosome" << std::endl;
         for (int i = 0; i < population[0]->arrSize; i++)
         {
-            std::cout << i << ": lesson id: " << population[0]->curriculumn[i].first << " teacher id: " << population[0]->curriculumn[i].second << std::endl;
+            std::cout << i << ": lesson id: " << population[0]->curriculum[i].first << " teacher id: " << population[0]->curriculum[i].second << std::endl;
         }
     #endif // DEBUG
 
@@ -99,16 +99,16 @@ int main (int argc, char** argv)
                 std::cout << "Comp: " << comparator << " |  Score: " << par2->getScore() << " with dis: " << par2->getDistribution() << std::endl;
             #endif // DEBUG        
             int size = distr(generator)% par1->arrSize;
-            newPopulation[i] = new chromosome(par1->curriculumn, size, par2->curriculumn);
-            newPopulation[populationSize / 2 + i] = new chromosome(par2->curriculumn, size, par1->curriculumn);
+            newPopulation[i] = new chromosome(par1->curriculum, size, par2->curriculum);
+            newPopulation[populationSize / 2 + i] = new chromosome(par2->curriculum, size, par1->curriculum);
 
             for (int j = 0; j < par1->arrSize; j++)
             {
                 if (distr(generator) < INT_MAX * 0.15)
-                    newPopulation[i]->curriculumn[j] = lessonTeacher[distr(generator) % lessonTeacher.size()];
+                    newPopulation[i]->curriculum[j] = lessonTeacher[distr(generator) % lessonTeacher.size()];
                 
                 if (distr(generator) < INT_MAX * 0.15) 
-                    newPopulation[populationSize / 2 + i]->curriculumn[j] = lessonTeacher[distr(generator) % lessonTeacher.size()];   
+                    newPopulation[populationSize / 2 + i]->curriculum[j] = lessonTeacher[distr(generator) % lessonTeacher.size()];   
             }
         }
 
@@ -213,9 +213,9 @@ void scoreCalculation(chromosome* chrom, json& lessons, json& teachers)
         }
 
 
-        if (chrom->curriculumn[i].first != -1) // ignore free period
+        if (chrom->curriculum[i].first != -1) // ignore free period
         { 
-            counterLH[chrom->curriculumn[i].first] -= 1;
+            counterLH[chrom->curriculum[i].first] -= 1;
         }
         
         if (i % 35 == 34)
@@ -281,14 +281,14 @@ void scoreCalculation(chromosome* chrom, json& lessons, json& teachers)
     for (int i = 0; i < chrom->arrSize; i++)
     {
         #ifdef DEBUG
-        std::cout << "Now teaches: " << chrom->curriculumn[hour + classvar].second <<std::endl;
+        std::cout << "Now teaches: " << chrom->curriculum[hour + classvar].second <<std::endl;
         std::cout << "i: " << i << " cell: " << hour + classvar << std::endl;
         #endif // DEBUG
 
-        if (chrom->curriculumn[hour + classvar].second != -1) // ignore free period
+        if (chrom->curriculum[hour + classvar].second != -1) // ignore free period
         {
-            teacherDayWeek[std::to_string(chrom->curriculumn[hour + classvar].second)].first -= 1;
-            teacherDayWeek[std::to_string(chrom->curriculumn[hour + classvar].second)].second -= 1;
+            teacherDayWeek[std::to_string(chrom->curriculum[hour + classvar].second)].first -= 1;
+            teacherDayWeek[std::to_string(chrom->curriculum[hour + classvar].second)].second -= 1;
         }
 
         hour++;

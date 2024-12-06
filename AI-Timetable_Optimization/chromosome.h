@@ -15,7 +15,7 @@ public:
 		for (int i = 0; i < arrSize; i++)
 		{
 			int rand = std::rand();
-			curriculumn[i] = lessonTeacher[rand % lessonTeacher.size()];
+			curriculum[i] = lessonTeacher[rand % lessonTeacher.size()];
 		}
 	}
 
@@ -23,16 +23,16 @@ public:
 	{
 		for (int i = 0; i < size1; i++)
 		{
-			curriculumn[i] = genes1[i];
+			curriculum[i] = genes1[i];
 		}
 
 		for (int i = 0; i < arrSize - size1; i++)
 		{
-			curriculumn[i + size1] = genes2[i];
+			curriculum[i + size1] = genes2[i];
 		}
 	}	
 
-	std::pair<int, int> curriculumn[arrSize];
+	std::pair<int, int> curriculum[arrSize];
 	
 	void addScore(int score);
 	int getScore() const;
