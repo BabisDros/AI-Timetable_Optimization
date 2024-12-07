@@ -6,7 +6,8 @@ class chromosome {
 	int score = 10;
 	int distribution = 0;
 public:
-	static const int arrSize = 3 * 3 * 5 * 7; // 0-6: Monday and so on, from class A1 to class C3
+	static const int nClassesPerGrade = 3;
+	static const int arrSize = nClassesPerGrade * 3 * 5 * 7; // classesPerGrade, Grades, DaysPerWeek, HoursPerDay
 
 	chromosome() {}
 
