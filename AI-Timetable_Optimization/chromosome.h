@@ -6,8 +6,14 @@ class chromosome {
 	int score = 10;
 	int distribution = 0;
 public:
-	static const int nClassesPerGrade = 3;
-	static const int arrSize = nClassesPerGrade * 3 * 5 * 7; // classesPerGrade, Grades, DaysPerWeek, HoursPerDay
+		static const int nClassesPerGrade = 3;
+		static const int nGrades = 3;
+		static const int nDaysPerWeek = 5;
+		static const int nHoursPerDay = 7;
+
+
+
+		static const int arrSize = nClassesPerGrade * nGrades * nDaysPerWeek * nHoursPerDay; // classesPerGrade, Grades, DaysPerWeek, HoursPerDay
 
 	chromosome() {}
 
@@ -42,4 +48,10 @@ public:
 
 	static bool compareDistributionVal(int val, chromosome* a);
 
+	static int calculateIndex(int cls, int grade, int day, int hour) {
+		return cls 
+			+ nClassesPerGrade * grade 
+			+ nClassesPerGrade * nGrades * day 
+			+ nClassesPerGrade * nGrades * nDaysPerWeek * hour;
+}
 };
