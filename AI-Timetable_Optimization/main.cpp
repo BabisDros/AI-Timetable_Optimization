@@ -229,7 +229,7 @@ void scoreCalculation(chromosome* chrom, json& lessons, json& teachers)
                     std::cout << it->second << " | ";
                 #endif // DEBUG
 
-               
+
                 if (it->second == 0) // can have more cases depending on how close it was
                     evalVariance += 1;
                 else
@@ -277,7 +277,7 @@ void scoreCalculation(chromosome* chrom, json& lessons, json& teachers)
 
     int hour = 0;
     int classvar = 0;
-    int counter = 0;
+    int nExceededLimit = 0;
     for (int i = 0; i < chrom->arrSize; i++)
     {
         #ifdef DEBUG
@@ -307,7 +307,7 @@ void scoreCalculation(chromosome* chrom, json& lessons, json& teachers)
                     std::cout << itr->first << " can teach " << itr->second.first << " more hours" << std::endl;
                 #endif // DEBUG
                 if (itr->second.first < 0)
-                    counter++;
+                    nExceededLimit++;
                 total++;
 
                 itr->second.first = teachers[itr->first]["hoursPerDay"]; //reset value
@@ -319,23 +319,23 @@ void scoreCalculation(chromosome* chrom, json& lessons, json& teachers)
     for (auto itr = teacherDayWeek.begin(); itr != teacherDayWeek.end(); itr++)
     {
         if (itr->second.second < 0)
-            counter++; // or more
+            nExceededLimit++; // or more
         total++;// increase by same amount
     }
  
-    if (counter == 0)
+    if (nExceededLimit == 0)
         chrom->addScore(10000);
-    else if (counter <= total*0.05)
+    else if (nExceededLimit <= total*0.05)
         chrom->addScore(1000);
-    else if (counter <= total*0.2)
+    else if (nExceededLimit <= total*0.2)
         chrom->addScore(400);
-    else if (counter <= total*0.4)
+    else if (nExceededLimit <= total*0.4)
         chrom->addScore(200);
-    else if (counter <= total*0.7)
+    else if (nExceededLimit <= total*0.7)
         chrom->addScore(50);
-    else if (counter <= total*0.85)
+    else if (nExceededLimit <= total*0.85)
         chrom->addScore(10);
-    else if (counter == total)
+    else if (nExceededLimit == total)
         chrom->addScore(1);
 
 
