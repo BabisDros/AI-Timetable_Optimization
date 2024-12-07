@@ -1,16 +1,64 @@
 {
-    "Teachers":{
-        "100":{
+    "Teachers": {
+        "100": {
             "name": "Papadopoulos",
-            "teaches": ["10","11"],
-            "hoursPerDay": 3,
-            "hoursPerWeek": 10
+            "teaches": ["10", "11", "12"],
+            "hoursPerDay": 4,
+            "hoursPerWeek": 16
         },
-        "101":{
+        "101": {
             "name": "Makri",
             "teaches": ["11"],
             "hoursPerDay": 4,
             "hoursPerWeek": 14
+        },
+        "102": {
+            "name": "Kostantinidis",
+            "teaches": ["13", "14"],
+            "hoursPerDay": 4,
+            "hoursPerWeek": 16
+        },
+        "103": {
+            "name": "Papanikolaou",
+            "teaches": ["15", "16"],
+            "hoursPerDay": 3,
+            "hoursPerWeek": 12
+        },
+        "104": {
+            "name": "Georgiou",
+            "teaches": ["17", "18"],
+            "hoursPerDay": 3,
+            "hoursPerWeek": 12
+        },
+        "105": {
+            "name": "Alexiou",
+            "teaches": ["19", "22"],
+            "hoursPerDay": 2,
+            "hoursPerWeek": 8
+        },
+        "106": {
+            "name": "Marinou",
+            "teaches": ["20", "21"],
+            "hoursPerDay": 4,
+            "hoursPerWeek": 14
+        },
+        "107": {
+            "name": "Xanthos",
+            "teaches": ["23", "24"],
+            "hoursPerDay": 3,
+            "hoursPerWeek": 9
+        },
+        "108": {
+            "name": "Papagianni",
+            "teaches": ["25", "26"],
+            "hoursPerDay": 3,
+            "hoursPerWeek": 12
+        },
+        "109": {
+            "name": "Nikolaidis",
+            "teaches": ["27", "28"],
+            "hoursPerDay": 2,
+            "hoursPerWeek": 6
         }
     }
 }
