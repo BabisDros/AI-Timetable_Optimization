@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <random>
 #include <climits>
+#include <set>
 
 #define DEBUG
 
@@ -339,9 +340,42 @@ void scoreCalculation(chromosome* chrom, json& lessons, json& teachers)
         chrom->addScore(1);
 
 
-    /* a teacher can't be at the same time in 2 different classes, static scoring {tip: check every 35 cells, memory use recommended}
-    
-    */
+    // a teacher can't be at the same time in 2 different classes, static scoring
+    int nDaysPerWeek = 5; // TODO: replace with chromosome definition
+    int nHoursPerDay = 7; 
+    int nClassesPerGrade = 3;
+    int nGrades = 3; 
+
+    int conflicts = 0;
+    total = 0;
+
+    for (int day = 0; day < nDaysPerWeek; ++day) {
+        for (int hour = 0; hour < nHoursPerDay; ++hour) {
+            std::set<int> teacherSet; // teachers for this (day, hour)
+            for (int grade = 0; grade < nGrades; ++grade) {
+                for (int cls = 0; cls < nClassesPerGrade; ++cls) {
+                    int index = chrom->calculateIndex(cls, grade, day, hour);
+                    int teacherID = chrom->curriculum[index].second;
+                    total++;
+
+                    // Check if teacher is already teaching
+                    if (teacherSet.find(teacherID) != teacherSet.end()) {
+                        ++conflicts;
+                    } else {
+                        teacherSet.insert(teacherID);
+                    }
+                }
+            }
+        }
+    }
+
+    std::cout << "Total: " << total << ", Conflicts: " << conflicts << std::endl;
+
+    if (conflicts == 0)
+        chrom->addScore(10000);
+    else {
+        chrom->addScore(1);
+    }
 
     /* no free periods between classes, static scoring
     
