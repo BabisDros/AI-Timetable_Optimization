@@ -5,8 +5,10 @@
 #include <random>
 #include <climits>
 #include <set>
+#include <unordered_set>
+#include <cmath>
 
-#define DEBUG
+// #define DEBUG
 
 int main (int argc, char** argv)
 {
@@ -14,8 +16,11 @@ int main (int argc, char** argv)
     std::mt19937                        generator(1);// seed
     std::uniform_int_distribution<>     distr(1, INT_MAX); //big number rand
     std::srand(1);// set seed for testing
-    int populationSize = 10;
-    int maxGen = 20;
+    
+    // Hyperparameters
+    int POPULATION_SIZE = 100;
+    int MAX_GEN = 100;
+    int MUTATION_PROB = 0.15;
 
     // get json data
     std::ifstream f("data/lessons.json");
@@ -36,14 +41,14 @@ int main (int argc, char** argv)
         }
     }
 
-    chromosome** population = new chromosome*[populationSize];
-    chromosome** newPopulation = new chromosome*[populationSize];
+    chromosome** population = new chromosome*[POPULATION_SIZE];
+    chromosome** newPopulation = new chromosome*[POPULATION_SIZE];
     chromosome** tempPopulationPtr = nullptr;
 
     /* initialize population with randomized values
 
     */
-    for (int i = 0; i < populationSize; i++)
+    for (int i = 0; i < POPULATION_SIZE; i++)
         population[i] = new chromosome(lessonTeacher);
 
 
@@ -62,63 +67,62 @@ int main (int argc, char** argv)
     #endif // DEBUG
 
     
-    /* start of loop of new generations
-    
-    */
-    for (int gen = 0; gen < maxGen; gen++)
+    // start of loop of new generations
+    for (int gen = 0; gen < MAX_GEN; gen++)
     {
 
-        /* score evaluation
-        
-        */
+        // score evaluation
         int totalScore = 0;
-        for (int i = 0; i < populationSize; i++)
+        int bestScore = INT_MIN;
+
+        for (int i = 0; i < POPULATION_SIZE; i++)
         {
             scoreCalculation(population[i], lessons, teachers);
             totalScore += population[i]->getScore();
             population[i]->setDistribution(totalScore);
-        }
+            if (population[i]->getScore() > bestScore) bestScore = population[i]->getScore();
+        }   
+
+        double avgScore = (double) totalScore/POPULATION_SIZE;
 
 
+        // EVALUATION METRICS
+        std::cout << "Gen: " << gen << ", " << "Best Score: " << bestScore << ", " << "Avg Score: " << avgScore << std::endl;
+        computeDiversity(population, POPULATION_SIZE);
 
-        /* crossbreeding and mutation
-
-        */
-
+        // crossbreeding and mutation
         int comparator;
-        for (int i = 0; i < populationSize/2; i++)
+        for (int i = 0; i < POPULATION_SIZE/2; i++)
         {
             comparator = distr(generator)% totalScore;
-            chromosome* par1 = (*std::upper_bound(population, population + populationSize - 1, comparator, chromosome::compareDistributionVal));
+            chromosome* par1 = (*std::upper_bound(population, population + POPULATION_SIZE - 1, comparator, chromosome::compareDistributionVal));
            #ifdef DEBUG
                 std::cout << "Comp: " << comparator << " |  Score: " << par1->getScore() << " with dis: " << par1->getDistribution() << std::endl;
            #endif // DEBUG
 
             comparator = distr(generator)% totalScore;
-            chromosome* par2 = (*std::upper_bound(population, population + populationSize - 1, comparator, chromosome::compareDistributionVal));
+            chromosome* par2 = (*std::upper_bound(population, population + POPULATION_SIZE - 1, comparator, chromosome::compareDistributionVal));
             #ifdef DEBUG
                 std::cout << "Comp: " << comparator << " |  Score: " << par2->getScore() << " with dis: " << par2->getDistribution() << std::endl;
             #endif // DEBUG        
             int size = distr(generator)% par1->arrSize;
             newPopulation[i] = new chromosome(par1->curriculum, size, par2->curriculum);
-            newPopulation[populationSize / 2 + i] = new chromosome(par2->curriculum, size, par1->curriculum);
+            newPopulation[POPULATION_SIZE / 2 + i] = new chromosome(par2->curriculum, size, par1->curriculum);
 
             for (int j = 0; j < par1->arrSize; j++)
             {
-                if (distr(generator) < INT_MAX * 0.15)
+                if (distr(generator) < INT_MAX * MUTATION_PROB)
                     newPopulation[i]->curriculum[j] = lessonTeacher[distr(generator) % lessonTeacher.size()];
                 
-                if (distr(generator) < INT_MAX * 0.15) 
-                    newPopulation[populationSize / 2 + i]->curriculum[j] = lessonTeacher[distr(generator) % lessonTeacher.size()];   
+                if (distr(generator) < INT_MAX * MUTATION_PROB) 
+                    newPopulation[POPULATION_SIZE / 2 + i]->curriculum[j] = lessonTeacher[distr(generator) % lessonTeacher.size()];   
             }
         }
 
 
 
-        /* delete previous population, with allocated memory if needed
-
-        */
-        for (int i = 0; i < populationSize; i++)
+        // delete previous population, with allocated memory if needed
+        for (int i = 0; i < POPULATION_SIZE; i++)
         {
             if (population[i] == NULL) continue;
             delete population[i];
@@ -130,22 +134,22 @@ int main (int argc, char** argv)
 
     }
 
+
     // print Best
     chromosome* bestGenes = population[0];
-    for (int i = 0; i < populationSize; i++)
+    for (int i = 0; i < POPULATION_SIZE; i++)
     {
         scoreCalculation(population[i], lessons, teachers);
         if (bestGenes->getScore() > population[i]->getScore()) continue;
         bestGenes = population[i];
     }
-
-
+    std::cout << "Best Score Overall: " << bestGenes->getScore() << std::endl;
 
 
     //jsonUseExample(lessons, teachers);
 
     //Memory cleanup
-    for (int i = 0; i < populationSize; i++)
+    for (int i = 0; i < POPULATION_SIZE; i++)
     {
         if (population[i] == NULL) continue;
         delete population[i];
@@ -265,9 +269,7 @@ void scoreCalculation(chromosome* chrom, json& lessons, json& teachers)
     }
     
 
-    /* each teacher can not teach more than the daily/weekly limit, static scoring
-    
-    */
+    // each teacher can not teach more than the daily/weekly limit, static scoring
     std::map <std::string, std::pair<int, int>> teacherDayWeek;
     total = 0;
     for (auto teacher : teachers.items())
@@ -341,45 +343,43 @@ void scoreCalculation(chromosome* chrom, json& lessons, json& teachers)
 
 
     // a teacher can't be at the same time in 2 different classes, static scoring
-    int nDaysPerWeek = 5; // TODO: replace with chromosome definition
+    int nDaysPerWeek = 5; // TODO: replace based on chromosome arraySize definition
     int nHoursPerDay = 7; 
     int nClassesPerGrade = 3;
     int nGrades = 3; 
 
     int conflicts = 0;
-    total = 0;
 
-    for (int day = 0; day < nDaysPerWeek; ++day) {
-        for (int hour = 0; hour < nHoursPerDay; ++hour) {
+    for (int day = 0; day < nDaysPerWeek; day++) {
+        for (int hour = 0; hour < nHoursPerDay; hour++) {
             std::set<int> teacherSet; // teachers for this (day, hour)
-            for (int grade = 0; grade < nGrades; ++grade) {
-                for (int cls = 0; cls < nClassesPerGrade; ++cls) {
+            for (int grade = 0; grade < nGrades; grade++) {
+                for (int cls = 0; cls < nClassesPerGrade; cls++) {
                     int index = chrom->calculateIndex(cls, grade, day, hour);
                     int teacherID = chrom->curriculum[index].second;
-                    total++;
 
                     // Check if teacher is already teaching
-                    if (teacherSet.find(teacherID) != teacherSet.end()) {
-                        ++conflicts;
-                    } else {
+                    // .find() returns .end() if the element is not found
+                    if (teacherSet.find(teacherID) == teacherSet.end()) {
                         teacherSet.insert(teacherID);
+                    } else {
+                        conflicts++;
                     }
                 }
             }
         }
     }
 
-    std::cout << "Total: " << total << ", Conflicts: " << conflicts << std::endl;
-
+    // std::cout << "Conflicts: " << conflicts << std::endl;
     if (conflicts == 0)
         chrom->addScore(10000);
     else {
-        chrom->addScore(1);
+        chrom->addScore(-1 * conflicts);
     }
 
-    /* no free periods between classes, static scoring
-    
-    */
+    // no free periods between classes, static scoring
+
+
 
     /* a teacher shouldn't teach for more than 2 hours in a row, variable scoring
     
@@ -398,3 +398,24 @@ void scoreCalculation(chromosome* chrom, json& lessons, json& teachers)
     */
 }
 
+
+void computeDiversity(chromosome** population, int POPULATION_SIZE) {
+    std::unordered_set<chromosome*> uniqueChromosomes;
+    double mean = 0, variance = 0;
+
+    for (int i = 0; i < POPULATION_SIZE; i++) {
+        uniqueChromosomes.insert(population[i]);
+        mean += population[i]->getScore();
+    }
+
+    mean /= POPULATION_SIZE;
+
+    for (int i = 0; i < POPULATION_SIZE; i++) {
+        variance += std::pow(population[i]->getScore() - mean, 2);
+    }
+    variance /= POPULATION_SIZE;
+
+    std::cout << "Unique Chromosomes: " << uniqueChromosomes.size() 
+              << ", Score StdDev: " << std::sqrt(variance)
+              << ", Diversity: " << (double)uniqueChromosomes.size() / POPULATION_SIZE << std::endl;
+}

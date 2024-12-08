@@ -6,3 +6,4 @@ using json = nlohmann::json;
 
 void jsonUseExample(json& lessons, json& teachers);
 void scoreCalculation(chromosome* chrom, json& lessons, json& teachers);
+void computeDiversity(chromosome** population, int populationSize);
