@@ -1,0 +1,10 @@
+{
+    "Lessons":{
+        "1":{
+            "name": "Greek",
+            "classes":[
+                    {"year": "A", "hours": 3}
+            ]
+        }
+    }
+}
