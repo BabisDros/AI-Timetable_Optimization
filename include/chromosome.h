@@ -3,17 +3,14 @@
 #include <vector>
 
 class chromosome {
-	int score = 10;
+	int score = 0;
 	int distribution = 0;
-public:
-		static const int nClassesPerGrade = 3;
-		static const int nGrades = 3;
-		static const int nDaysPerWeek = 5;
-		static const int nHoursPerDay = 7;
-
-
-
-		static const int arrSize = nClassesPerGrade * nGrades * nDaysPerWeek * nHoursPerDay; // classesPerGrade, Grades, DaysPerWeek, HoursPerDay
+    public:
+    static const int nClassesPerGrade = 1;
+    static const int nGrades = 1;
+    static const int nDaysPerWeek = 5;
+    static const int nHoursPerDay = 7;
+	static const int arrSize = nClassesPerGrade * nGrades * nDaysPerWeek * nHoursPerDay;
 
 	chromosome() {}
 
@@ -53,5 +50,7 @@ public:
 			+ nClassesPerGrade * grade 
 			+ nClassesPerGrade * nGrades * day 
 			+ nClassesPerGrade * nGrades * nDaysPerWeek * hour;
-}
+    }
+
+    
 };

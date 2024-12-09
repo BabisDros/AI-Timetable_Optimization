@@ -18,25 +18,25 @@ int main (int argc, char** argv)
     std::srand(1);// set seed for testing
     
     // Hyperparameters
-    int POPULATION_SIZE = 100;
-    int MAX_GEN = 100;
+    int POPULATION_SIZE = 10;
+    int MAX_GEN = 10;
     int MUTATION_PROB = 0.15;
 
+    // Data paths
+    std::string LESSON_DATA_PATH = "data/simpleLessons.json";
+    std::string TEACHER_DATA_PATH = "data/simpleTeachers.json";
+
     // get json data
-    std::ifstream f("data/lessons.json");
+    std::ifstream f(LESSON_DATA_PATH);
     json lessons = json::parse(f)["Lessons"];
     f.close();
-    f.open("data/teachers.json");
+    f.open(TEACHER_DATA_PATH);
     json teachers = json::parse(f)["Teachers"];
     
     std::vector<std::pair<int, int>> lessonTeacher;
     lessonTeacher.push_back(std::make_pair(-1,-1)); // free period
-
-
-    for (auto teacher : teachers.items())
-    {
-        for (auto lesson : teacher.value()["teaches"].items())
-        {
+    for (auto teacher : teachers.items()) {
+        for (auto lesson : teacher.value()["teaches"].items()) {
             lessonTeacher.push_back(std::make_pair(stoi( (std::string) lesson.value()), stoi(teacher.key())));
         }
     }
@@ -53,16 +53,22 @@ int main (int argc, char** argv)
 
 
     #ifdef DEBUG
-        std::cout << "All pairs\n";
+        std::cout << "All possible (lessonID, teacherID) pairs\n";
         for (std::pair t : lessonTeacher)
         {
             std::cout << "lessons id: " << t.first << " teacher id: " << t.second << std::endl;
         }
-
-        std::cout << "Check curriculum data of 1st chromosome" << std::endl;
+        
+        std::cout << "\nCurriculum Params: " 
+            << "\nClasses per Grade: " << population[0]->nClassesPerGrade
+            << "\nGrades: " << population[0]->nGrades
+            << "\nDays per Week: " << population[0]->nDaysPerWeek
+            << "\nHours per Day: " << population[0]->nHoursPerDay 
+            << std::endl;
+        std::cout << "\nCheck curriculum data of 1st chromosome. \nFormat: (curriculumIndex, lessonId, teacherId)" << std::endl;
         for (int i = 0; i < population[0]->arrSize; i++)
         {
-            std::cout << i << ": lesson id: " << population[0]->curriculum[i].first << " teacher id: " << population[0]->curriculum[i].second << std::endl;
+            std::cout << i << ": (" << population[0]->curriculum[i].first << ", " << population[0]->curriculum[i].second << ")" << std::endl;
         }
     #endif // DEBUG
 
@@ -73,44 +79,42 @@ int main (int argc, char** argv)
 
         // score evaluation
         int totalScore = 0;
-        int bestScore = INT_MIN;
+        int bestScore = 0;
 
-        for (int i = 0; i < POPULATION_SIZE; i++)
-        {
+        for (int i = 0; i < POPULATION_SIZE; i++) {
             scoreCalculation(population[i], lessons, teachers);
+            #ifdef DEBUG
+            std::cout << "population[" << i << "] score: " << population[i]->getScore() << std::endl;
+            #endif // DEBUG
             totalScore += population[i]->getScore();
             population[i]->setDistribution(totalScore);
             if (population[i]->getScore() > bestScore) bestScore = population[i]->getScore();
         }   
 
-        double avgScore = (double) totalScore/POPULATION_SIZE;
-
+        int avgScore = (int) totalScore/POPULATION_SIZE;
 
         // EVALUATION METRICS
-        std::cout << "Gen: " << gen << ", " << "Best Score: " << bestScore << ", " << "Avg Score: " << avgScore << std::endl;
-        computeDiversity(population, POPULATION_SIZE);
+        std::cout << "\n== GEN: " << gen << " ==" << std::endl;
+        std::cout << "Best Score: " << bestScore << ", " << "Avg Score: " << avgScore << std::endl;
 
         // crossbreeding and mutation
         int comparator;
-        for (int i = 0; i < POPULATION_SIZE/2; i++)
-        {
+        for (int i = 0; i < POPULATION_SIZE/2; i++) {
             comparator = distr(generator)% totalScore;
-            chromosome* par1 = (*std::upper_bound(population, population + POPULATION_SIZE - 1, comparator, chromosome::compareDistributionVal));
+            chromosome* par1 = (*std::upper_bound(population, population + POPULATION_SIZE, comparator, chromosome::compareDistributionVal));
            #ifdef DEBUG
-                std::cout << "Comp: " << comparator << " |  Score: " << par1->getScore() << " with dis: " << par1->getDistribution() << std::endl;
+                std::cout << "Parent1: " << "Score: " << par1->getScore() << ", Comp: " << comparator << " with dis: " << par1->getDistribution() << std::endl; 
            #endif // DEBUG
-
             comparator = distr(generator)% totalScore;
-            chromosome* par2 = (*std::upper_bound(population, population + POPULATION_SIZE - 1, comparator, chromosome::compareDistributionVal));
+            chromosome* par2 = (*std::upper_bound(population, population + POPULATION_SIZE, comparator, chromosome::compareDistributionVal));
             #ifdef DEBUG
-                std::cout << "Comp: " << comparator << " |  Score: " << par2->getScore() << " with dis: " << par2->getDistribution() << std::endl;
+                std::cout << "Parent2: " << "Score: " << par1->getScore() << ", Comp: " << comparator << " with dis: " << par1->getDistribution() << std::endl; 
             #endif // DEBUG        
             int size = distr(generator)% par1->arrSize;
             newPopulation[i] = new chromosome(par1->curriculum, size, par2->curriculum);
             newPopulation[POPULATION_SIZE / 2 + i] = new chromosome(par2->curriculum, size, par1->curriculum);
 
-            for (int j = 0; j < par1->arrSize; j++)
-            {
+            for (int j = 0; j < par1->arrSize; j++) {
                 if (distr(generator) < INT_MAX * MUTATION_PROB)
                     newPopulation[i]->curriculum[j] = lessonTeacher[distr(generator) % lessonTeacher.size()];
                 
@@ -118,32 +122,25 @@ int main (int argc, char** argv)
                     newPopulation[POPULATION_SIZE / 2 + i]->curriculum[j] = lessonTeacher[distr(generator) % lessonTeacher.size()];   
             }
         }
-
-
-
         // delete previous population, with allocated memory if needed
-        for (int i = 0; i < POPULATION_SIZE; i++)
-        {
+        for (int i = 0; i < POPULATION_SIZE; i++) {
             if (population[i] == NULL) continue;
             delete population[i];
         }
-
         tempPopulationPtr = population;
         population = newPopulation;
         newPopulation = tempPopulationPtr;
-
     }
 
 
     // print Best
     chromosome* bestGenes = population[0];
-    for (int i = 0; i < POPULATION_SIZE; i++)
-    {
+    for (int i = 0; i < POPULATION_SIZE; i++) {
         scoreCalculation(population[i], lessons, teachers);
         if (bestGenes->getScore() > population[i]->getScore()) continue;
         bestGenes = population[i];
     }
-    std::cout << "Best Score Overall: " << bestGenes->getScore() << std::endl;
+    std::cout << "Best Score after " << MAX_GEN << " generations: " << bestGenes->getScore() << std::endl;
 
 
     //jsonUseExample(lessons, teachers);
@@ -180,242 +177,4 @@ void jsonUseExample(json &lessons, json &teachers)
             std::cout << "Teaches " << lessons[teaching.value()]["name"] << std::endl;
         }
     }
-}
-
-void scoreCalculation(chromosome* chrom, json& lessons, json& teachers)
-{
-    /* each lesson must appear x,y,z times for all classes, variable scoring
-    
-    */
-    std::map <int, int> counterLH; // hold hours for each lesson
-    std::string classYear[3] = { "A", "B", "C" };
-    int year = -1;
-    bool added;
-    int evalVariance = 0;
-    int total = 0;
-
-    for (int i = 0; i < chrom->arrSize; i++)
-    {
-        if (i % (35 * 3) == 0) // year change
-            year++;
-        if (i % 35 == 0) // class change
-        {                  
-            for (auto lesson : lessons.items())
-            {
-                added = false;
-                for (int k = 0; k < lesson.value()["classes"].size(); k++)
-                {
-                    if (lesson.value()["classes"][k]["year"] == classYear[year])
-                    {
-                        counterLH.insert({stoi(lesson.key()), (int)lesson.value()["classes"][k]["hours"]}); // times it must appear
-                        added = true;
-                        break;
-                    }
-                }
-                if (!added)
-                    counterLH.insert({ stoi(lesson.key()), 0}); // does not appear in year
-            }
-        }
-
-
-        if (chrom->curriculum[i].first != -1) // ignore free period
-        { 
-            counterLH[chrom->curriculum[i].first] -= 1;
-        }
-        
-        if (i % 35 == 34)
-        {
-            #ifdef DEBUG
-                std::cout << "Year: " << year + 1 << " Class: " << (i/35) % 3 + 1 << " | ";
-            #endif // DEBUG
-            for (auto it = counterLH.begin(); it != counterLH.end(); it++)
-            {
-                #ifdef DEBUG
-                    std::cout << it->second << " | ";
-                #endif // DEBUG
-
-
-                if (it->second == 0) // can have more cases depending on how close it was
-                    evalVariance += 1;
-                else
-                    evalVariance -= 1;
-                total++;
-            }
-
-            #ifdef DEBUG
-                std::cout << std::endl;
-            #endif // DEBUG
-
-
-            if (evalVariance <= -50)
-                chrom->addScore(1);
-            else if (evalVariance <= -10)
-                chrom->addScore(5);
-            else if (evalVariance <= 0)
-                chrom->addScore(10);
-            else if (evalVariance <= total*0.3)
-                chrom->addScore(30);
-            else if (evalVariance <= total*0.5)
-                chrom->addScore(80);
-            else if (evalVariance <= total*0.8)
-                chrom->addScore(200);
-            else if (evalVariance < total)
-                chrom->addScore(400);
-            else if (evalVariance == total) // all lessons appear the specified hours
-                chrom->addScore(10000);
-
-            counterLH.clear();
-        }
-    }
-    
-
-    // each teacher can not teach more than the daily/weekly limit, static scoring
-    std::map <std::string, std::pair<int, int>> teacherDayWeek;
-    total = 0;
-    for (auto teacher : teachers.items())
-    {
-        teacherDayWeek.insert({teacher.key(),
-            std::make_pair( (int)teacher.value()["hoursPerDay"], (int)teacher.value()["hoursPerWeek"] )});
-    }
-
-    int hour = 0;
-    int classvar = 0;
-    int nExceededLimit = 0;
-    for (int i = 0; i < chrom->arrSize; i++)
-    {
-        #ifdef DEBUG
-        std::cout << "Now teaches: " << chrom->curriculum[hour + classvar].second <<std::endl;
-        std::cout << "i: " << i << " cell: " << hour + classvar << std::endl;
-        #endif // DEBUG
-
-        if (chrom->curriculum[hour + classvar].second != -1) // ignore free period
-        {
-            teacherDayWeek[std::to_string(chrom->curriculum[hour + classvar].second)].first -= 1;
-            teacherDayWeek[std::to_string(chrom->curriculum[hour + classvar].second)].second -= 1;
-        }
-
-        hour++;
-
-        if (hour >= 7)
-        { 
-            hour = 0;
-            classvar += 35; // same day, next class
-        }
-        
-        if (classvar >= chrom->arrSize) // use data, go next day
-        {
-            for (auto itr = teacherDayWeek.begin(); itr != teacherDayWeek.end(); itr++)
-            {
-                #ifdef DEBUG
-                    std::cout << itr->first << " can teach " << itr->second.first << " more hours" << std::endl;
-                #endif // DEBUG
-                if (itr->second.first < 0)
-                    nExceededLimit++;
-                total++;
-
-                itr->second.first = teachers[itr->first]["hoursPerDay"]; //reset value
-            }
-            classvar = (classvar + 7) % 35;
-        }
-    }
-
-    for (auto itr = teacherDayWeek.begin(); itr != teacherDayWeek.end(); itr++)
-    {
-        if (itr->second.second < 0)
-            nExceededLimit++; // or more
-        total++;// increase by same amount
-    }
- 
-    if (nExceededLimit == 0)
-        chrom->addScore(10000);
-    else if (nExceededLimit <= total*0.05)
-        chrom->addScore(1000);
-    else if (nExceededLimit <= total*0.2)
-        chrom->addScore(400);
-    else if (nExceededLimit <= total*0.4)
-        chrom->addScore(200);
-    else if (nExceededLimit <= total*0.7)
-        chrom->addScore(50);
-    else if (nExceededLimit <= total*0.85)
-        chrom->addScore(10);
-    else if (nExceededLimit == total)
-        chrom->addScore(1);
-
-
-    // a teacher can't be at the same time in 2 different classes, static scoring
-    int nDaysPerWeek = 5; // TODO: replace based on chromosome arraySize definition
-    int nHoursPerDay = 7; 
-    int nClassesPerGrade = 3;
-    int nGrades = 3; 
-
-    int conflicts = 0;
-
-    for (int day = 0; day < nDaysPerWeek; day++) {
-        for (int hour = 0; hour < nHoursPerDay; hour++) {
-            std::set<int> teacherSet; // teachers for this (day, hour)
-            for (int grade = 0; grade < nGrades; grade++) {
-                for (int cls = 0; cls < nClassesPerGrade; cls++) {
-                    int index = chrom->calculateIndex(cls, grade, day, hour);
-                    int teacherID = chrom->curriculum[index].second;
-
-                    // Check if teacher is already teaching
-                    // .find() returns .end() if the element is not found
-                    if (teacherSet.find(teacherID) == teacherSet.end()) {
-                        teacherSet.insert(teacherID);
-                    } else {
-                        conflicts++;
-                    }
-                }
-            }
-        }
-    }
-
-    // std::cout << "Conflicts: " << conflicts << std::endl;
-    if (conflicts == 0)
-        chrom->addScore(10000);
-    else {
-        chrom->addScore(-1 * conflicts);
-    }
-
-    // no free periods between classes, static scoring
-
-
-
-    /* a teacher shouldn't teach for more than 2 hours in a row, variable scoring
-    
-    */
-
-    /* each classes programm should be uniformly spread out throughout the week, variable scoring
-    
-    */
-
-    /* each lesson for each class should be uniformly spread out throughout the week, static scoring
-    
-    */
-
-    /* all teacher should be teacher per week around the same amount of times, variable scoring
-    
-    */
-}
-
-
-void computeDiversity(chromosome** population, int POPULATION_SIZE) {
-    std::unordered_set<chromosome*> uniqueChromosomes;
-    double mean = 0, variance = 0;
-
-    for (int i = 0; i < POPULATION_SIZE; i++) {
-        uniqueChromosomes.insert(population[i]);
-        mean += population[i]->getScore();
-    }
-
-    mean /= POPULATION_SIZE;
-
-    for (int i = 0; i < POPULATION_SIZE; i++) {
-        variance += std::pow(population[i]->getScore() - mean, 2);
-    }
-    variance /= POPULATION_SIZE;
-
-    std::cout << "Unique Chromosomes: " << uniqueChromosomes.size() 
-              << ", Score StdDev: " << std::sqrt(variance)
-              << ", Diversity: " << (double)uniqueChromosomes.size() / POPULATION_SIZE << std::endl;
 }
