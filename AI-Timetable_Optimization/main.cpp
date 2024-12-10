@@ -7,24 +7,32 @@
 #include <set>
 #include <unordered_set>
 #include <cmath>
+#include <iomanip> // for setting precision
+
 
 // #define DEBUG
 
 int main (int argc, char** argv)
 {
-    std::random_device                  rand_dev;
     std::mt19937                        generator(1);// seed
     std::uniform_int_distribution<>     distr(1, INT_MAX); //big number rand
     std::srand(1);// set seed for testing
     
     // Hyperparameters
-    int POPULATION_SIZE = 10;
-    int MAX_GEN = 10;
+    int POPULATION_SIZE = 100;
+    int MAX_GEN = 100;
     int MUTATION_PROB = 0.15;
 
     // Data paths
-    std::string LESSON_DATA_PATH = "data/simpleLessons.json";
-    std::string TEACHER_DATA_PATH = "data/simpleTeachers.json";
+    std::string LESSON_DATA_PATH = "data/lessons.json";
+    std::string TEACHER_DATA_PATH = "data/teachers.json";
+
+    // Save results for evaluation
+    std::string EVAL_METRICS_PATH = "data_analysis/evaluation_metrics.csv";
+    std::ofstream evalMetricsFile(EVAL_METRICS_PATH, std::ios::trunc); // overwrite
+    if (evalMetricsFile.tellp() == 0) {
+        evalMetricsFile << "Generation,BestScore,AvgScore\n";
+    }
 
     // get json data
     std::ifstream f(LESSON_DATA_PATH);
@@ -45,9 +53,7 @@ int main (int argc, char** argv)
     chromosome** newPopulation = new chromosome*[POPULATION_SIZE];
     chromosome** tempPopulationPtr = nullptr;
 
-    /* initialize population with randomized values
-
-    */
+    // initialize population with randomized values
     for (int i = 0; i < POPULATION_SIZE; i++)
         population[i] = new chromosome(lessonTeacher);
 
@@ -74,6 +80,7 @@ int main (int argc, char** argv)
 
     
     // start of loop of new generations
+    int bestScoreOverall = 0;
     for (int gen = 0; gen < MAX_GEN; gen++)
     {
 
@@ -89,6 +96,7 @@ int main (int argc, char** argv)
             totalScore += population[i]->getScore();
             population[i]->setDistribution(totalScore);
             if (population[i]->getScore() > bestScore) bestScore = population[i]->getScore();
+            if (population[i]->getScore() > bestScoreOverall) bestScoreOverall = population[i]->getScore();
         }   
 
         int avgScore = (int) totalScore/POPULATION_SIZE;
@@ -96,6 +104,7 @@ int main (int argc, char** argv)
         // EVALUATION METRICS
         std::cout << "\n== GEN: " << gen << " ==" << std::endl;
         std::cout << "Best Score: " << bestScore << ", " << "Avg Score: " << avgScore << std::endl;
+        evalMetricsFile << gen << "," << std::fixed << std::setprecision(2) << bestScore << "," << avgScore << "\n";
 
         // crossbreeding and mutation
         int comparator;
@@ -140,7 +149,12 @@ int main (int argc, char** argv)
         if (bestGenes->getScore() > population[i]->getScore()) continue;
         bestGenes = population[i];
     }
-    std::cout << "Best Score after " << MAX_GEN << " generations: " << bestGenes->getScore() << std::endl;
+    std::cout << "Best Score (last gen) after " << MAX_GEN << " generations: " << bestGenes->getScore() << std::endl;
+
+
+    evalMetricsFile.close();
+    std::cout << "Best Score (overall) after " << MAX_GEN << " generations: " << bestScoreOverall << std::endl;
+
 
 
     //jsonUseExample(lessons, teachers);

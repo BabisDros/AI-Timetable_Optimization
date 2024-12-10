@@ -3,7 +3,9 @@
         "1":{
             "name": "Greek",
             "classes":[
-                    {"year": "A", "hours": 3}
+                    {"year": "A", "hours": 3},
+                    {"year": "B", "hours": 3},
+                    {"year": "C", "hours": 3}
             ]
         }
     }
