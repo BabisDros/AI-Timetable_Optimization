@@ -14,3 +14,4 @@ double calculateConsecutiveHoursScore(chromosome* chrom);
 double hoursPerDayUniformityScore(int hoursPerDay[], int maxHoursPerDay, int nDaysPerWeek);
 double calculateAverageUniformityScore(chromosome* chrom);
 void debugHoursPerDay(int cls, int grade, const int hoursPerDay[], int nDaysPerWeek, double uniformityScore);
+double teachSimilarHoursPerWeek(chromosome*, json& teachers);

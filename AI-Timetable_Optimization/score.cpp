@@ -26,7 +26,8 @@ void scoreCalculation(chromosome* chrom, json& lessons, json& teachers) {
     // each lesson for each class should be uniformly spread out throughout the week, static scoring
     
 
-    // all teacher should be teacher per week around the same amount of times, variable scoring
+    // all teachers should teach around the same hours per week, variable scoring
+    totalScore += teachSimilarHoursPerWeek(chrom, teachers);
 
    chrom->addScore(totalScore);
 }
@@ -90,7 +91,7 @@ double calculateSatisfyLessonHoursScore(chromosome* chrom, json& lessons) {
     else if (totalErrors < totalPossibleViolations)
         score = 400;
     else if (totalErrors == totalPossibleViolations) // all lessons appear the specified hours
-        score = 10000;
+        score = 1000;
     return score;
 }
 
@@ -149,7 +150,7 @@ double calculateDailyWeeklyLimitScore(chromosome* chrom, json& teachers) {
         total++;// increase by same amount
     }
     
-    return (nExceededLimit>0) ? 0 : 100;
+    return (nExceededLimit>0) ? 0 : 1000;
 }
 
 double calculateTeacherConflictScore(chromosome* chrom) {
@@ -180,7 +181,7 @@ double calculateTeacherConflictScore(chromosome* chrom) {
         }
     }
 
-    return (conflicts>0) ? 0 : 100;
+    return (conflicts>0) ? 0 : 1000;
 }
 
 double calculateNoFreePeriodsScore(chromosome* chrom) {
@@ -214,6 +215,7 @@ double calculateConsecutiveHoursScore(chromosome* chrom) {
         }
     }
 
+    // TODO: Maybe use step scoring
     double score = 100.0;
     double totalPossibleViolations = totalLessons / 3.0;
     double penaltyPerViolation = 100.0 / totalPossibleViolations;
@@ -267,6 +269,52 @@ double hoursPerDayUniformityScore(int hoursPerDay[], int maxHoursPerDay, int nDa
 
     // Normalize the difference to a score between 0 and 100
     int maxPossibleDiff = maxHoursPerDay;
+    double score = (1.0 - (static_cast<double>(diff) / maxPossibleDiff)) * 100;
+    return score;
+}
+
+double teachSimilarHoursPerWeek(chromosome* chrom, json& teachers) {
+    std::map<int, int> teacherHoursTaught;
+
+    for (int i=0; i < chrom->arrSize; i++) {
+        std::pair<int, int> lessonTeacher = chrom->curriculum[i];
+        if (lessonTeacher.second == -1) continue;
+        teacherHoursTaught[lessonTeacher.second] += 1;
+    }
+
+    // calculate relative to each teacher's max hours
+    // hoursTaught / maximumHours
+    std::vector<double> intensity;
+    for (const auto& tH : teacherHoursTaught) {
+        int id = tH.first;
+        int hoursTaught = tH.second;
+
+        int maxHoursPossible = teachers[std::to_string(id)]["hoursPerWeek"];
+        double intens = static_cast<double>(hoursTaught) / maxHoursPossible;
+        intensity.push_back(intens);
+    }
+
+    // if (intensity.empty()) {
+    //     std::cerr << "Error: No intensity data available." << std::endl;
+    //     return 0.0; // Return a default score or handle the case appropriately
+    // }
+
+
+    // Find the overall maximum hours per week a teacher is available
+    // to calculate the maximum possible difference
+    // i.e. The overall maximum teacher works all of their hours, and another one 0
+    int overallMaxHoursPerWeek = 0;
+    for (auto& teacher : teachers.items()) {
+        int maxHPerWeek = teacher.value()["hoursPerWeek"];
+        if (maxHPerWeek > overallMaxHoursPerWeek) overallMaxHoursPerWeek = maxHPerWeek;
+    }
+
+    double maxHours = *std::max_element(std::begin(intensity), std::end(intensity));
+    double minHours = *std::min_element(std::begin(intensity), std::end(intensity));
+    double diff = maxHours - minHours;
+
+    // Normalize the difference to a score between 0 and 100
+    int maxPossibleDiff = overallMaxHoursPerWeek;
     double score = (1.0 - (static_cast<double>(diff) / maxPossibleDiff)) * 100;
     return score;
 }
