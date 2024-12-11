@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Read the CSV file
-df = pd.read_csv('data_analysis/evaluation_metrics.csv')
+df = pd.read_csv('bin/data_analysis/evaluation_metrics.csv')
 
 # Convert the columns to numpy arrays (if needed)
 best_score = df['BestScore'].to_numpy()

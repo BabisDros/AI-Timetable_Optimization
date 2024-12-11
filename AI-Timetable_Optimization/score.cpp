@@ -227,7 +227,7 @@ double calculateConsecutiveHoursScore(chromosome* chrom) {
 
 double calculateAverageUniformityScore(chromosome* chrom) {
     // each class program should be uniformly spread out throughout the week, variable scoring    
-    int nDaysPerWeek = chrom->nDaysPerWeek;
+    const int nDaysPerWeek = chrom->nDaysPerWeek;
     int nHoursPerDay = chrom->nHoursPerDay; 
     int nClassesPerGrade = chrom->nClassesPerGrade;
     int nGrades = chrom->nGrades; 
