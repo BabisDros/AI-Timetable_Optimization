@@ -8,21 +8,28 @@
 #include <unordered_set>
 #include <cmath>
 #include <iomanip> // for setting precision
+#include <algorithm>
+#include <execution>
 
 
 // #define DEBUG
 
 int main (int argc, char** argv)
 {
+    std::random_device                  rand_dev;// used for randomised seed
     std::mt19937                        generator(1);// seed
     std::uniform_int_distribution<>     distr(1, INT_MAX); //big number rand
     std::srand(1);// set seed for testing
     
     // Hyperparameters
-    int POPULATION_SIZE = 100;
-    int MAX_GEN = 100;
-    int MUTATION_PROB = 0.15;
-
+    int POPULATION_SIZE = 400;
+    int MAX_GEN = 400;
+    double MUTATION_PROB = 0.05;
+    if (chromosome::nGrades != 3)
+    {
+        std::cout << "Need to set chromosome grade to 3 to continue\n";
+        exit(-1);
+    }
     // Data paths
     std::string LESSON_DATA_PATH = "data/lessons.json";
     std::string TEACHER_DATA_PATH = "data/teachers.json";
@@ -88,16 +95,20 @@ int main (int argc, char** argv)
         int totalScore = 0;
         int bestScore = 0;
 
+        std::for_each(std::execution::par, population, population+ POPULATION_SIZE, [&](chromosome* chrom)
+            {
+                scoreCalculation(chrom, lessons, teachers);
+            });
+
         for (int i = 0; i < POPULATION_SIZE; i++) {
-            scoreCalculation(population[i], lessons, teachers);
             #ifdef DEBUG
-            std::cout << "population[" << i << "] score: " << population[i]->getScore() << std::endl;
+                std::cout << "population[" << i << "] score: " << population[i]->getScore() << std::endl;
             #endif // DEBUG
             totalScore += population[i]->getScore();
             population[i]->setDistribution(totalScore);
             if (population[i]->getScore() > bestScore) bestScore = population[i]->getScore();
             if (population[i]->getScore() > bestScoreOverall) bestScoreOverall = population[i]->getScore();
-        }   
+        }
 
         int avgScore = (int) totalScore/POPULATION_SIZE;
 
@@ -117,7 +128,7 @@ int main (int argc, char** argv)
             comparator = distr(generator)% totalScore;
             chromosome* par2 = (*std::upper_bound(population, population + POPULATION_SIZE, comparator, chromosome::compareDistributionVal));
             #ifdef DEBUG
-                std::cout << "Parent2: " << "Score: " << par1->getScore() << ", Comp: " << comparator << " with dis: " << par1->getDistribution() << std::endl; 
+                std::cout << "Parent2: " << "Score: " << par2->getScore() << ", Comp: " << comparator << " with dis: " << par2->getDistribution() << std::endl; 
             #endif // DEBUG        
             int size = distr(generator)% par1->arrSize;
             newPopulation[i] = new chromosome(par1->curriculum, size, par2->curriculum);

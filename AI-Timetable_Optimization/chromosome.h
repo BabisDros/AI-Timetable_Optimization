@@ -3,7 +3,7 @@
 #include <vector>
 
 class chromosome {
-	int score = 0;
+	int score = 1; // should never be 0
 	int distribution = 0;
     public:
     static const int nClassesPerGrade = 3;

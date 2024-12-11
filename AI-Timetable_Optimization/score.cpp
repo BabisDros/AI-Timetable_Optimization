@@ -9,25 +9,25 @@ void scoreCalculation(chromosome* chrom, json& lessons, json& teachers) {
     totalScore += calculateSatisfyLessonHoursScore(chrom, lessons);
 
     // each teacher can not teach more than the daily/weekly limit, static scoring
-    totalScore += calculateDailyWeeklyLimitScore(chrom, teachers);
+   // totalScore += calculateDailyWeeklyLimitScore(chrom, teachers);
 
     // a teacher can't be at the same time in 2 different classes, static scoring
-    totalScore += calculateTeacherConflictScore(chrom);
+  //  totalScore += calculateTeacherConflictScore(chrom);
 
     // no free periods between classes, variable scoring
-    totalScore += calculateNoFreePeriodsScore(chrom);
+  //  totalScore += calculateNoFreePeriodsScore(chrom);
 
     // a teacher shouldn't teach for more than 2 hours in a row, variable scoring
-    totalScore += calculateConsecutiveHoursScore(chrom);
+  //  totalScore += calculateConsecutiveHoursScore(chrom);
 
     // each class hours per day total should be uniformly spread out throughout the week, variable scoring
-    totalScore += calculateAverageUniformityScore(chrom);
+  //  totalScore += calculateAverageUniformityScore(chrom);
 
     // each lesson for each class should be uniformly spread out throughout the week, static scoring
     
 
     // all teachers should teach around the same hours per week, variable scoring
-    totalScore += teachSimilarHoursPerWeek(chrom, teachers);
+   // totalScore += teachSimilarHoursPerWeek(chrom, teachers);
 
    chrom->addScore(totalScore);
 }
@@ -36,61 +36,61 @@ double calculateSatisfyLessonHoursScore(chromosome* chrom, json& lessons) {
     // Each lesson has a required amount of hours for each grade.
     // eg. lesson_id = 1 : A=3, B=2, C=2, etc.
     // This info can be obtained from the json data.
-    // Maximum Error: Total Required Hours in Curriculum = nGrades * nClassesPerGrade
-    std::map<int, int> lessonID_totalRequiredHours; // total required hours for each lesson based on json data
-    int allHours = 0;
-    for (auto& lesson : lessons.items()) {
-        int lessonID = std::stoi(lesson.key());
-        auto& classes = lesson.value()["classes"];
-        
-        int totalHours = 0;
-        for (int i=0; i < classes.size(); i++) {
-            auto& yearHours = classes[i];
-            int hours = yearHours["hours"];
-            totalHours += hours;
-            allHours += hours;
-        }
-        lessonID_totalRequiredHours[lessonID] = totalHours;
-        // if (lessonID == 1) std::cout << "Lesson ID: " << lessonID << " Total Required Hours: " << totalHours << std::endl;
-    }
-
-    // Calculate the actual amount of hours per lesson in the chromosome curriculum
-    // For each lesson, get the difference (can be either negative for underrepresented lessons, or positive for overrepresented lessons)
-    // Score based on the absolute of the difference
-    for (int i = 0; i < chrom->arrSize; i++) {
-        std::pair<int, int> lessonTeacher = chrom->curriculum[i];
-        int lessonID = lessonTeacher.first;
-        if (lessonID == -1) continue;
-        lessonID_totalRequiredHours[lessonID] -= 1;
-        
-    }
-
-    // std::cout << "hoursLeft for l1: " << lessonID_totalRequiredHours[1] << std::endl;
-
-    int totalErrors = 0;
-    for (auto& lessonRH : lessonID_totalRequiredHours) {
-        int hoursLeft = lessonRH.second;
-        totalErrors += std::abs(hoursLeft);
-    }
-    // std::cout << "Errors: " << totalErrors << std::endl;
-    double totalPossibleViolations = chrom->arrSize;
-
     int score = 0;
-    if (totalErrors <= -50)
-        score = 1;
-    else if (totalErrors <= -10)
-        score = 5;
-    else if (totalErrors <= 0)
-        score = 10;
-    else if (totalErrors <= totalPossibleViolations*0.3)
-        score = 30;
-    else if (totalErrors <= totalPossibleViolations*0.5)
-        score = 80;
-    else if (totalErrors <= totalPossibleViolations*0.8)
-        score = 200;
-    else if (totalErrors < totalPossibleViolations)
-        score = 400;
-    else if (totalErrors == totalPossibleViolations) // all lessons appear the specified hours
+    std::map <int, int> counterLH; // hold hours for each lesson
+    std::string classYear[3] = { "A", "B", "C" };
+    int year = -1;
+    bool added;
+    double evalVariance = 0;
+    double total = 0;
+    int weeklyHours = chrom->nDaysPerWeek * chrom->nHoursPerDay;
+    int classCount = chrom->nClassesPerGrade;
+    int yearChange = weeklyHours * classCount;
+
+    for (int i = 0; i < chrom->arrSize; i++)
+    {
+        if (i % (yearChange) == 0) // year change
+            year++;
+        if (i % weeklyHours == 0) // class change
+        {
+            for (auto lesson : lessons.items())
+            {
+                added = false;
+                for (int k = 0; k < lesson.value()["classes"].size(); k++)
+                {
+                    if (lesson.value()["classes"][k]["year"] == classYear[year])
+                    {
+                        counterLH.insert({ stoi(lesson.key()), (int)lesson.value()["classes"][k]["hours"] }); // times it must appear
+                        added = true;
+                        break;
+                    }
+            }
+                if (!added)
+                    counterLH.insert({ stoi(lesson.key()), 0 }); // does not appear in year
+            }
+    }
+
+
+        if (chrom->curriculum[i].first != -1) // ignore free period
+        {
+            counterLH[chrom->curriculum[i].first] -= 1;
+        }
+
+        if (i % weeklyHours == weeklyHours-1) //gone through a class
+        {
+            for (auto it = counterLH.begin(); it != counterLH.end(); it++)
+            {
+                if (it->second == 0)
+                    evalVariance++;
+                total++;
+            }
+            counterLH.clear();
+        }
+    }
+    
+    score = (int) (pow((evalVariance/total), 2) * 800);
+
+    if (evalVariance == total) // all lessons appear the specified hours
         score = 1000;
     return score;
 }
@@ -106,7 +106,9 @@ double calculateDailyWeeklyLimitScore(chromosome* chrom, json& teachers) {
 
     int hour = 0;
     int classvar = 0;
-    int nExceededLimit = 0;
+    int nBelowLimit = 0;
+    int nDailyHours = chrom->nHoursPerDay;
+    int nWeeklyHours = nDailyHours * chrom->nDaysPerWeek;
     for (int i = 0; i < chrom->arrSize; i++) {
         #ifdef DEBUG
         std::cout << "Now teaches: " << chrom->curriculum[hour + classvar].second <<std::endl;
@@ -121,9 +123,9 @@ double calculateDailyWeeklyLimitScore(chromosome* chrom, json& teachers) {
 
         hour++;
 
-        if (hour >= 7) { 
+        if (hour >= nDailyHours) {
             hour = 0;
-            classvar += 35; // same day, next class
+            classvar += nWeeklyHours; // same day, next class
         }
         
         if (classvar >= chrom->arrSize) // use data, go next day
@@ -133,24 +135,24 @@ double calculateDailyWeeklyLimitScore(chromosome* chrom, json& teachers) {
                 #ifdef DEBUG
                     std::cout << itr->first << " can teach " << itr->second.first << " more hours" << std::endl;
                 #endif // DEBUG
-                if (itr->second.first < 0)
-                    nExceededLimit++;
+                if (itr->second.first >= 0)
+                    nBelowLimit++;
                 total++;
 
                 itr->second.first = teachers[itr->first]["hoursPerDay"]; //reset value
             }
-            classvar = (classvar + 7) % 35;
+            classvar = (classvar + nDailyHours) % nWeeklyHours; // pivot on next day
         }
     }
 
     for (auto itr = teacherDayWeek.begin(); itr != teacherDayWeek.end(); itr++)
     {
-        if (itr->second.second < 0)
-            nExceededLimit++; // or more
+        if (itr->second.second >= 0)
+            nBelowLimit++; // or more
         total++;// increase by same amount
     }
     
-    return (nExceededLimit>0) ? 0 : 1000;
+    return (nBelowLimit != total) ? 0 : 1000;
 }
 
 double calculateTeacherConflictScore(chromosome* chrom) {
