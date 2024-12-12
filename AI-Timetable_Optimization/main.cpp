@@ -31,11 +31,11 @@ int main (int argc, char** argv)
         exit(-1);
     }
     // Data paths
-    std::string LESSON_DATA_PATH = "data/lessons.json";
-    std::string TEACHER_DATA_PATH = "data/teachers.json";
+    std::string LESSON_DATA_PATH = "bin/data/lessons.json";
+    std::string TEACHER_DATA_PATH = "bin/data/teachers.json";
 
     // Save results for evaluation
-    std::string EVAL_METRICS_PATH = "data_analysis/evaluation_metrics.csv";
+    std::string EVAL_METRICS_PATH = "bin/data_analysis/evaluation_metrics.csv";
     std::ofstream evalMetricsFile(EVAL_METRICS_PATH, std::ios::trunc); // overwrite
     if (evalMetricsFile.tellp() == 0) {
         evalMetricsFile << "Generation,BestScore,AvgScore\n";
