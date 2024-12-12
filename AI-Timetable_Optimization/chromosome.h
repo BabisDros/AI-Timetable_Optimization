@@ -46,12 +46,10 @@ class chromosome {
 
 	static bool compareDistributionVal(long long val, chromosome* a);
 
-	static int calculateIndex(int cls, int grade, int day, int hour) {
-		return cls 
-			+ nClassesPerGrade * grade 
-			+ nClassesPerGrade * nGrades * day 
-			+ nClassesPerGrade * nGrades * nDaysPerWeek * hour;
+	static int calculateIndex(int hour, int day, int cls, int grade) {
+		return hour 
+			+ nHoursPerDay * day 
+			+ nHoursPerDay * nDaysPerWeek * cls 
+			+ nHoursPerDay * nDaysPerWeek * nClassesPerGrade * grade;
     }
-
-    
 };

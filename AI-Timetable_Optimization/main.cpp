@@ -35,7 +35,7 @@ int main (int argc, char** argv)
     std::string TEACHER_DATA_PATH = "data/teachers.json";
 
     // Save results for evaluation
-    std::string EVAL_METRICS_PATH = "data_analysis/evaluation_metrics.csv";
+    std::string EVAL_METRICS_PATH = "bin/data_analysis/evaluation_metrics.csv";
     std::ofstream evalMetricsFile(EVAL_METRICS_PATH, std::ios::trunc); // overwrite
     if (evalMetricsFile.tellp() == 0) {
         evalMetricsFile << "Generation,BestScore,AvgScore\n";
