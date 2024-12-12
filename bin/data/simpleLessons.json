@@ -3,9 +3,49 @@
         "1":{
             "name": "Greek",
             "classes":[
+                    {"year": "A", "hours": 7},
+                    {"year": "B", "hours": 6},
+                    {"year": "C", "hours": 7}
+            ]
+        },
+        "2":{
+            "name": "Literature",
+            "classes":[
                     {"year": "A", "hours": 3},
+                    {"year": "B", "hours": 6},
+                    {"year": "C", "hours": 5}
+            ]
+        },
+        "3":{
+            "name": "Ancient Greek",
+            "classes":[
+                    {"year": "A", "hours": 5},
                     {"year": "B", "hours": 3},
                     {"year": "C", "hours": 3}
+            ]
+        },
+        "4":{
+            "name": "Math",
+            "classes":[
+                    {"year": "A", "hours": 5},
+                    {"year": "B", "hours": 5},
+                    {"year": "C", "hours": 5}
+            ]
+        },
+        "5":{
+            "name": "Physics",
+            "classes":[
+                    {"year": "A", "hours": 5},
+                    {"year": "B", "hours": 5},
+                    {"year": "C", "hours": 5}
+            ]
+        },
+        "6":{
+            "name": "Chemistry",
+            "classes":[
+                    {"year": "A", "hours": 5},
+                    {"year": "B", "hours": 5},
+                    {"year": "C", "hours": 5}
             ]
         }
     }

@@ -1,3 +1,4 @@
+#pragma once
 #include "main.h"
 #include <iostream>
 #include <fstream>
@@ -16,15 +17,14 @@
 
 int main (int argc, char** argv)
 {
-    std::random_device                  rand_dev;// used for randomised seed
-    std::mt19937                        generator(1);// seed
-    std::uniform_int_distribution<>     distr(1, INT_MAX); //big number rand
-    std::srand(1);// set seed for testing
+    std::random_device                          rand_dev;// used for randomised seed
+    std::mt19937_64                             generator(1);// seed
+    std::uniform_int_distribution<long long>    distr(1, LLONG_MAX); //big number rand
     
     // Hyperparameters
-    int POPULATION_SIZE = 400;
-    int MAX_GEN = 400;
-    double MUTATION_PROB = 0.05;
+    int POPULATION_SIZE = 3000;
+    int MAX_GEN = 4500;
+    long double MUTATION_PROB = 0.25L;
     if (chromosome::nGrades != 3)
     {
         std::cout << "Need to set chromosome grade to 3 to continue\n";
@@ -62,7 +62,7 @@ int main (int argc, char** argv)
 
     // initialize population with randomized values
     for (int i = 0; i < POPULATION_SIZE; i++)
-        population[i] = new chromosome(lessonTeacher);
+        population[i] = new chromosome(lessonTeacher, distr, generator);
 
 
     #ifdef DEBUG
@@ -87,13 +87,28 @@ int main (int argc, char** argv)
 
     
     // start of loop of new generations
-    int bestScoreOverall = 0;
+    long long bestScoreOverall = 0;
     for (int gen = 0; gen < MAX_GEN; gen++)
     {
-
+        if (gen == 400)
+            MUTATION_PROB = 0.15L;
+        if (gen == 800)
+            MUTATION_PROB = 0.1L;
+        if (gen == 1000)
+            MUTATION_PROB = 0.05L;
+        if (gen == 1300)
+            MUTATION_PROB = 0.03L;
+        if (gen == 1800)
+            MUTATION_PROB = 0.02L;
+        if (gen == 2200)
+            MUTATION_PROB = 0.01L;
+        if (gen == 2800)
+            MUTATION_PROB = 0.005L;
+        if (gen == 3500)
+            MUTATION_PROB = 0L;
         // score evaluation
-        int totalScore = 0;
-        int bestScore = 0;
+        long long totalScore = 0;
+        long long bestScore = 0;
 
         std::for_each(std::execution::par, population, population+ POPULATION_SIZE, [&](chromosome* chrom)
             {
@@ -102,15 +117,16 @@ int main (int argc, char** argv)
 
         for (int i = 0; i < POPULATION_SIZE; i++) {
             #ifdef DEBUG
-                std::cout << "population[" << i << "] score: " << population[i]->getScore() << std::endl;
+                std::cout << "population[" << i << "] score: " << population[i]->getScore() << " total: " << totalScore << std::endl;
             #endif // DEBUG
             totalScore += population[i]->getScore();
             population[i]->setDistribution(totalScore);
             if (population[i]->getScore() > bestScore) bestScore = population[i]->getScore();
             if (population[i]->getScore() > bestScoreOverall) bestScoreOverall = population[i]->getScore();
+            if (totalScore < 0) exit(-2); // overflow, impossible with long long
         }
 
-        int avgScore = (int) totalScore/POPULATION_SIZE;
+        long long avgScore = totalScore/ (long long)POPULATION_SIZE;
 
         // EVALUATION METRICS
         std::cout << "\n== GEN: " << gen << " ==" << std::endl;
@@ -118,7 +134,7 @@ int main (int argc, char** argv)
         evalMetricsFile << gen << "," << std::fixed << std::setprecision(2) << bestScore << "," << avgScore << "\n";
 
         // crossbreeding and mutation
-        int comparator;
+        long long comparator;
         for (int i = 0; i < POPULATION_SIZE/2; i++) {
             comparator = distr(generator)% totalScore;
             chromosome* par1 = (*std::upper_bound(population, population + POPULATION_SIZE, comparator, chromosome::compareDistributionVal));
@@ -130,15 +146,15 @@ int main (int argc, char** argv)
             #ifdef DEBUG
                 std::cout << "Parent2: " << "Score: " << par2->getScore() << ", Comp: " << comparator << " with dis: " << par2->getDistribution() << std::endl; 
             #endif // DEBUG        
-            int size = distr(generator)% par1->arrSize;
+            int size = (int) (distr(generator)% (long long)par1->arrSize);
             newPopulation[i] = new chromosome(par1->curriculum, size, par2->curriculum);
             newPopulation[POPULATION_SIZE / 2 + i] = new chromosome(par2->curriculum, size, par1->curriculum);
 
             for (int j = 0; j < par1->arrSize; j++) {
-                if (distr(generator) < INT_MAX * MUTATION_PROB)
+                if (distr(generator) < LLONG_MAX * MUTATION_PROB)
                     newPopulation[i]->curriculum[j] = lessonTeacher[distr(generator) % lessonTeacher.size()];
                 
-                if (distr(generator) < INT_MAX * MUTATION_PROB) 
+                if (distr(generator) < LLONG_MAX * MUTATION_PROB)
                     newPopulation[POPULATION_SIZE / 2 + i]->curriculum[j] = lessonTeacher[distr(generator) % lessonTeacher.size()];   
             }
         }

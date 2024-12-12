@@ -1,10 +1,11 @@
 #pragma once
 #include <cstdlib>
 #include <vector>
+#include <random>
 
 class chromosome {
-	int score = 1; // should never be 0
-	int distribution = 0;
+	long long score = 1LL; // should never be 0
+	long long distribution = 0;
     public:
     static const int nClassesPerGrade = 3;
     static const int nGrades = 3;
@@ -14,11 +15,11 @@ class chromosome {
 
 	chromosome() {}
 
-	chromosome(std::vector<std::pair<int, int>>& lessonTeacher)
+	chromosome(std::vector<std::pair<int, int>>& lessonTeacher, std::uniform_int_distribution<long long>& distr, std::mt19937_64& gen)
 	{
 		for (int i = 0; i < arrSize; i++)
 		{
-			int rand = std::rand();
+			int rand = distr(gen);
 			curriculum[i] = lessonTeacher[rand % lessonTeacher.size()];
 		}
 	}
@@ -38,12 +39,12 @@ class chromosome {
 
 	std::pair<int, int> curriculum[arrSize];
 	
-	void addScore(int score);
-	int getScore() const;
-	void setDistribution(int val);
-	int getDistribution() const;
+	void addScore(long long score);
+	long long getScore() const;
+	void setDistribution(long long val);
+	long long getDistribution() const;
 
-	static bool compareDistributionVal(int val, chromosome* a);
+	static bool compareDistributionVal(long long val, chromosome* a);
 
 	static int calculateIndex(int cls, int grade, int day, int hour) {
 		return cls 

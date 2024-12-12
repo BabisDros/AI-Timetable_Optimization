@@ -3,7 +3,7 @@
 
 void scoreCalculation(chromosome* chrom, json& lessons, json& teachers) {
 
-    double totalScore = 0;
+    long long totalScore = 0;
 
     // each lesson must appear x,y,z times for all classes, variable scoring
     totalScore += calculateSatisfyLessonHoursScore(chrom, lessons);
@@ -36,13 +36,13 @@ double calculateSatisfyLessonHoursScore(chromosome* chrom, json& lessons) {
     // Each lesson has a required amount of hours for each grade.
     // eg. lesson_id = 1 : A=3, B=2, C=2, etc.
     // This info can be obtained from the json data.
-    int score = 0;
+    long long score = 0;
     std::map <int, int> counterLH; // hold hours for each lesson
     std::string classYear[3] = { "A", "B", "C" };
     int year = -1;
     bool added;
-    double evalVariance = 0;
-    double total = 0;
+    long long evalVariance = 0;
+    long long total = 0;
     int weeklyHours = chrom->nDaysPerWeek * chrom->nHoursPerDay;
     int classCount = chrom->nClassesPerGrade;
     int yearChange = weeklyHours * classCount;
@@ -87,11 +87,12 @@ double calculateSatisfyLessonHoursScore(chromosome* chrom, json& lessons) {
             counterLH.clear();
         }
     }
-    
-    score = (int) (pow((evalVariance/total), 2) * 800);
+
+    score = (long long) (pow(evalVariance, 6));
 
     if (evalVariance == total) // all lessons appear the specified hours
-        score = 1000;
+    { // should inform the algorithm
+    } // higher priority
     return score;
 }
 

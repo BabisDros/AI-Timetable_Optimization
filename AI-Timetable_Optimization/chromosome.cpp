@@ -1,27 +1,27 @@
 #include "chromosome.h"
 
-void chromosome::addScore(int score)
+void chromosome::addScore(long long score)
 {
 	this->score += score;
 }
 
-int chromosome::getScore() const
+long long chromosome::getScore() const
 {
 	return score;
 }
 
-void chromosome::setDistribution(int val)
+void chromosome::setDistribution(long long val)
 {
 	distribution = val;
 }
 
-int chromosome::getDistribution() const
+long long chromosome::getDistribution() const
 {
 	return distribution;
 }
 
 
-bool chromosome::compareDistributionVal(int val, chromosome* a)
+bool chromosome::compareDistributionVal(long long val, chromosome* a)
 {
 	return val < a->distribution;
 }

@@ -2,9 +2,15 @@
     "Teachers": {
         "1": {
             "name": "Papadopoulos",
-            "teaches": ["1"],
+            "teaches": ["1","2","3"],
             "hoursPerDay": 7,
             "hoursPerWeek": 20
+        },
+        "2": {
+            "name": "Konstantinidis",
+            "teaches": ["4", "5", "6"],
+            "hoursPerDay": 4,
+            "hoursPerWeek": 10
         }
     }
 }
