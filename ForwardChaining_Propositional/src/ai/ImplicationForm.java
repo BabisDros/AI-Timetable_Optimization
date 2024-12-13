@@ -4,21 +4,21 @@ import java.util.List;
 
 class ImplicationForm
 {
-	private List<Literal> premise;
-	private Literal conclusion;
+	private List<String> premise;
+	private String conclusion;
 
-	public ImplicationForm(List<Literal> premise, Literal conclusionString)
+	public ImplicationForm(List<String> premise, String conclusionString)
 	{
 		this.premise = premise;
 		this.conclusion = conclusionString;
 	}
 
-	public List<Literal> getPremise()
+	public List<String> getPremise()
 	{
 		return premise;
 	}
 
-	public Literal getConclusion()
+	public String getConclusion()
 	{
 		return conclusion;
 	}

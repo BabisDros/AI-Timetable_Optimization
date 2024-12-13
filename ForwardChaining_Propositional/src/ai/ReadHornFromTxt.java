@@ -49,24 +49,23 @@ public class ReadHornFromTxt
 				String clauseWithoutParetheses = line.substring(1, line.length() - 1).trim();
 
 				// split literals by symbol "∨"
-				String[] stringliterals = clauseWithoutParetheses.split("∨");
-				List<Literal> premise = new ArrayList<>();
-				Literal conclusion = null;
+				String[] literals = clauseWithoutParetheses.split("∨");
+				List<String> premise = new ArrayList<>();
+				String conclusion = null;
 
-				for (String stringLiteral : stringliterals)
+				for (String literal : literals)
 				{
-					stringLiteral = stringLiteral.trim();
+					literal = literal.trim();
 
-					if (stringLiteral.startsWith("¬"))
+					if (literal.startsWith("¬"))
 					{
-						stringLiteral = stringLiteral.replace("¬", "");
-						Literal literal = new Literal(stringLiteral, false);
+						literal = literal.replace("¬", "");
 						premise.add(literal);
 					}
 
 					else
 					{
-						conclusion = new Literal(stringLiteral, false);
+						conclusion = literal;
 					}
 				}
 

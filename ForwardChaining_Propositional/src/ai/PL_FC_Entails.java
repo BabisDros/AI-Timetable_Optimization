@@ -20,20 +20,20 @@ public class PL_FC_Entails
 		// Initializate Collections
 		for (ImplicationForm implication : KB)
 		{
-			List<Literal> currentPremise = implication.getPremise();
+			List<String> currentPremise = implication.getPremise();
 
 			if (currentPremise.size() > 0)
 			{
 				count.put(implication, currentPremise.size());
 
-				for (Literal literal : currentPremise)
+				for (String symbol : currentPremise)
 				{
-					inferred.put(literal.getName(), false);
+					inferred.put(symbol, false);
 				}
 			}
 			else
 			{
-				String conclusion = implication.getConclusion().getName();
+				String conclusion = implication.getConclusion();
 				inferred.put(conclusion, false);
 				agenda.add(conclusion);
 			}
@@ -50,11 +50,21 @@ public class PL_FC_Entails
 				
 				for (Map.Entry<ImplicationForm,Integer> entry : count.entrySet()) 
 				{
-					System.out.println("Key = " + entry.getKey() +
-                            ", Value = " + entry.getValue());
-				}
-		            
-		    
+					int currentValue=entry.getValue();
+					if(entry.getKey().getPremise().contains(p))
+					{
+						entry.setValue(currentValue-1);
+					}
+					
+					if(entry.getValue()==0)
+					{
+						if(entry.getKey().getConclusion()==q)
+						{
+							return true;
+						}
+						agenda.add(entry.getKey().getConclusion());
+					}		
+				}       
 			}
 		}
 
