@@ -15,3 +15,5 @@ double hoursPerDayUniformityScore(int hoursPerDay[], int maxHoursPerDay, int nDa
 double calculateAverageUniformityScore(chromosome* chrom);
 void debugHoursPerDay(int cls, int grade, const int hoursPerDay[], int nDaysPerWeek, double uniformityScore);
 double teachSimilarHoursPerWeek(chromosome*, json& teachers);
+double calculateAllLessonHourSpreadScore(chromosome* chrom, json& lessons);
+double isLessonHoursSpreadIdeal(const std::vector<int>& hoursPerDay, int totalHours);

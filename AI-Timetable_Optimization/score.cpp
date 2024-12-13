@@ -24,6 +24,7 @@ void scoreCalculation(chromosome* chrom, json& lessons, json& teachers) {
 //    totalScore += calculateAverageUniformityScore(chrom);
 
     // each lesson for each class should be uniformly spread out throughout the week, static scoring
+    totalScore += calculateAllLessonHourSpreadScore(chrom, lessons);
 
     // all teachers should teach around the same hours per week, variable scoring
 //    totalScore += teachSimilarHoursPerWeek(chrom, teachers);
@@ -357,4 +358,57 @@ double teachSimilarHoursPerWeek(chromosome* chrom, json& teachers) {
         finalScore = 1000;
     }
     return finalScore;
+}
+
+double calculateAllLessonHourSpreadScore(chromosome* chrom, json& lessons) {
+    // Teaching hours for each lesson in each class should be uniformly spread out throughout the week
+    int totalIdealSpread = 0;
+    int totalConsidered = 0; // cls * grades * lessons
+
+    for (auto lesson : lessons.items()) {
+        int lessonID = std::stoi(lesson.key());
+        int maxHoursGradeA = lesson.value()["classes"][0]["hours"];
+        int maxHoursGradeB = lesson.value()["classes"][1]["hours"];
+        int maxHoursGradeC = lesson.value()["classes"][2]["hours"];
+
+        // Calculate lesson hour spread score for all unique classes (cls, grade)
+        for (int grade = 0; grade < chrom->nGrades; grade++) {
+            int maxHours = (grade == 0) ? maxHoursGradeA : (grade == 1) ? maxHoursGradeB : maxHoursGradeC;
+            for (int cls =0; cls < chrom->nClassesPerGrade; cls++) {
+                std::vector<int> hoursPerDay(chrom->nDaysPerWeek, 0);
+                for (int day = 0; day < chrom->nDaysPerWeek; day++) {
+                    for (int hour = 0; hour < chrom->nHoursPerDay; hour++) {
+                        int index = chrom->calculateIndex(hour, day, cls, grade);
+                        if (chrom->curriculum[index].first == lessonID) {hoursPerDay[day]++;}
+                    }
+                }   
+                totalIdealSpread += isLessonHoursSpreadIdeal(hoursPerDay, maxHours); // returns 1 if ideal, 0 if not
+                totalConsidered += 1;
+            }
+        }
+    }
+
+    // Between 0 and 1000 based on how many lessons have a uniform spread of hours for each (cls, grade)
+    double score = static_cast<double>(totalIdealSpread) / (totalConsidered) * 1000;
+    return score;
+}
+
+double isLessonHoursSpreadIdeal(const std::vector<int>& hoursPerDay, int totalHours) {
+    int numDays = hoursPerDay.size();
+    int idealHours = totalHours / numDays;
+    int remainder = totalHours % numDays;
+
+    // Evenly distribute the remainder (beginning to end)
+    std::vector<int> target(numDays, idealHours);
+    for (int i = 0; i < remainder; ++i) {
+        target[i] += 1;
+    }
+
+    std::vector<int> sortedHoursPerDay = hoursPerDay;
+    std::sort(sortedHoursPerDay.begin(), sortedHoursPerDay.end(), std::greater<int>());
+
+    for (int i = 0; i < numDays; i ++) {
+        if (sortedHoursPerDay[i] != target[i]) {return 0.0;}
+    }
+    return 1;
 }
