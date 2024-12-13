@@ -1,0 +1,5 @@
+(¬L∨¬Breeze∨B)
+(¬L∨¬Breeze∨¬B)
+(¬L¬Breeze∨B)
+(B)
+(¬L∨A)
