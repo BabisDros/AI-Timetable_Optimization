@@ -5,13 +5,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Scanner;
 import java.util.Set;
-
 
 public class PL_FC_Entails
 {
 
-	public static boolean PL_FC_ENTAILS(Set<ImplicationForm> KB, String q)
+	public static boolean doesPL_FC_Entails(Set<ImplicationForm> KB, String q)
 	{
 		Map<ImplicationForm, Integer> count = new HashMap<>();
 		Map<String, Boolean> inferred = new HashMap<>();
@@ -21,6 +21,7 @@ public class PL_FC_Entails
 		for (ImplicationForm implication : KB)
 		{
 			List<String> currentPremise = implication.getPremise();
+			String conclusion = implication.getConclusion();
 
 			if (currentPremise.size() > 0)
 			{
@@ -31,44 +32,96 @@ public class PL_FC_Entails
 					inferred.put(symbol, false);
 				}
 			}
-			else
+			else // symbols known to be true because of zero premise symbols
 			{
-				String conclusion = implication.getConclusion();
-				inferred.put(conclusion, false);
 				agenda.add(conclusion);
 			}
-		}
 
+			inferred.put(conclusion, false);
+
+		}
+		// main part
 		while (!agenda.isEmpty())
 		{
 			String p = agenda.remove();
 
 			Boolean isPTrue = inferred.get(p);
+
 			if (!isPTrue)
 			{
 				inferred.put(p, true);
-				
-				for (Map.Entry<ImplicationForm,Integer> entry : count.entrySet()) 
+
+				for (Map.Entry<ImplicationForm, Integer> countElement : count.entrySet())
 				{
-					int currentValue=entry.getValue();
-					if(entry.getKey().getPremise().contains(p))
+					int numberOfPremises = countElement.getValue();
+
+					// if the symbol is in the premise of current implication
+					if (countElement.getKey().getPremise().contains(p))
 					{
-						entry.setValue(currentValue-1);
+						count.put(countElement.getKey(), numberOfPremises - 1);
 					}
-					
-					if(entry.getValue()==0)
+
+					if (countElement.getValue().equals(0))
 					{
-						if(entry.getKey().getConclusion()==q)
+						if (countElement.getKey().getConclusion().equals(q))
 						{
 							return true;
 						}
-						agenda.add(entry.getKey().getConclusion());
-					}		
-				}       
+						agenda.add(countElement.getKey().getConclusion());
+					}
+				}
 			}
 		}
-
 		return false;
+	}
 
+	public static void main(String[] args)
+	{
+		String filename = "horn_clauses.txt";
+		Set<ImplicationForm> kB = ReadHornFromTxt.readHornClauses(filename);
+		for (ImplicationForm implication : kB)
+		{
+			System.out.println("Premise: " + implication.getPremise());
+			System.out.println("Conclusion: " + implication.getConclusion());
+			System.out.println("");
+		}
+
+		try (Scanner keyboard = new Scanner(System.in))
+		{
+			while (true)
+			{
+				System.out.print("Εισάγετε τον τύπο προς απόδειξη: ");
+
+				String input = keyboard.nextLine();
+				input = input.toUpperCase();
+
+				if (input.equals("0"))
+				{
+					System.out.println("Exiting program...");
+	                break;
+	                
+				}
+				
+				//color option from : https://www.tutorialspoint.com/how-to-print-colored-text-in-java-console#:~:text=Step%2D1%3A%20Create%20ANSI%20escape,formatting%20to%20its%20original%20condition.
+				String RESET = "\u001B[0m";
+		        String RED_TEXT = "\u001B[31m";
+		        String GREEN_TEXT = "\u001B[32m";
+		        
+				if (doesPL_FC_Entails(kB, input))
+				{
+			        System.out.println(GREEN_TEXT+ "True" + RESET);
+					System.out.println("True");
+				}
+				else
+				{
+					System.out.println(RED_TEXT + "False" + RESET);
+					System.out.println("Εισάγετε νέο τυπο ή 0 για έξοδο");
+				}				
+			}
+			
+			keyboard.close();
+		}
+		System.exit(0);
+		
 	}
 }
