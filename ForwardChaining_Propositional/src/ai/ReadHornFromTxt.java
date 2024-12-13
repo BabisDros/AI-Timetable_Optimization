@@ -4,27 +4,16 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ReadHornFromTxt
 {
 
-	public static void main(String[] args)
+	public static Set<ImplicationForm> readHornClauses(String filename)
 	{
-		String filename = "horn_clauses.txt";
-		List<ImplicationForm> implications = readHornClauses(filename);
-
-		for (ImplicationForm implication : implications)
-		{
-			System.out.println("Premise: " + implication.getPremise());
-			System.out.println("Conclusion: " + implication.getConclusion());
-			System.out.println("");
-		}
-	}
-
-	public static List<ImplicationForm> readHornClauses(String filename)
-	{
-		List<ImplicationForm> hornClauses = new ArrayList<>();
+		Set<ImplicationForm> implications = new HashSet<>();
 
 		try (BufferedReader reader = new BufferedReader(new FileReader(filename)))
 		{
@@ -38,7 +27,7 @@ public class ReadHornFromTxt
 					continue;
 				}
 
-				// Check validity of horn
+				// Check validity of horn. If invalid, skip to next line.
 				if (!isValidHornClause(line))
 				{
 					System.out.println("Clause in line:" + line + " is not in correct format. "
@@ -62,14 +51,14 @@ public class ReadHornFromTxt
 						literal = literal.replace("¬", "");
 						premise.add(literal);
 					}
-
+					
 					else
 					{
 						conclusion = literal;
 					}
 				}
 
-				hornClauses.add(new ImplicationForm(premise, conclusion));
+				implications.add(new ImplicationForm(premise, conclusion));
 			}
 
 			System.out.println("All data were read succesfully\n");
@@ -81,7 +70,12 @@ public class ReadHornFromTxt
 			System.exit(0);
 		}
 
-		return hornClauses;
+		if(implications.isEmpty())
+		{
+			System.out.println("The text file is empty...\\nThe program will now exit");
+			System.exit(0);
+		}
+		return implications;
 	}
 
 	public static boolean isValidHornClause(String line)
