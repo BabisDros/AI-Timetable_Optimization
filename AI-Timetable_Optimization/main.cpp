@@ -22,8 +22,8 @@ int main (int argc, char** argv)
     std::uniform_int_distribution<long long>    distr(1, LLONG_MAX); //big number rand
     
     // Hyperparameters
-    int POPULATION_SIZE = 3000;
-    int MAX_GEN = 4500;
+    int POPULATION_SIZE = 40000;
+    int MAX_GEN = 8000;
     long double MUTATION_PROB = 0.25L;
     if (chromosome::nGrades != 3)
     {
@@ -35,7 +35,7 @@ int main (int argc, char** argv)
     std::string TEACHER_DATA_PATH = "data/teachers.json";
 
     // Save results for evaluation
-    std::string EVAL_METRICS_PATH = "bin/data_analysis/evaluation_metrics.csv";
+    std::string EVAL_METRICS_PATH = "data_analysis/evaluation_metrics.csv";
     std::ofstream evalMetricsFile(EVAL_METRICS_PATH, std::ios::trunc); // overwrite
     if (evalMetricsFile.tellp() == 0) {
         evalMetricsFile << "Generation,BestScore,AvgScore\n";
@@ -88,6 +88,7 @@ int main (int argc, char** argv)
     
     // start of loop of new generations
     long long bestScoreOverall = 0;
+    chromosome* totalBestChrom = nullptr;
     for (int gen = 0; gen < MAX_GEN; gen++)
     {
         if (gen == 400)
@@ -122,7 +123,11 @@ int main (int argc, char** argv)
             totalScore += population[i]->getScore();
             population[i]->setDistribution(totalScore);
             if (population[i]->getScore() > bestScore) bestScore = population[i]->getScore();
-            if (population[i]->getScore() > bestScoreOverall) bestScoreOverall = population[i]->getScore();
+            if (population[i]->getScore() > bestScoreOverall)
+            {
+                bestScoreOverall = population[i]->getScore();
+                totalBestChrom = population[i];
+            }
             if (totalScore < 0) exit(-2); // overflow, impossible with long long
         }
 
@@ -178,10 +183,10 @@ int main (int argc, char** argv)
     }
     std::cout << "Best Score (last gen) after " << MAX_GEN << " generations: " << bestGenes->getScore() << std::endl;
 
-
+    
     evalMetricsFile.close();
     std::cout << "Best Score (overall) after " << MAX_GEN << " generations: " << bestScoreOverall << std::endl;
-
+    std::cout << "Pass to eval.py to calculate Constraint0 percentage: " << totalBestChrom->percent << std::endl;
 
 
     //jsonUseExample(lessons, teachers);

@@ -2,10 +2,12 @@
 #include <cstdlib>
 #include <vector>
 #include <random>
+#include <map>
 
 class chromosome {
 	long long score = 1LL; // should never be 0
 	long long distribution = 0;
+	int nConstraints = 8;
     public:
     static const int nClassesPerGrade = 3;
     static const int nGrades = 3;
@@ -13,9 +15,13 @@ class chromosome {
     static const int nHoursPerDay = 7;
 	static const int arrSize = nClassesPerGrade * nGrades * nDaysPerWeek * nHoursPerDay;
 
-	chromosome() {}
+	chromosome() 
+	{
+		for (int i = 0; i < nConstraints; i++)
+			passedConstraints[i] = false;
+	}
 
-	chromosome(std::vector<std::pair<int, int>>& lessonTeacher, std::uniform_int_distribution<long long>& distr, std::mt19937_64& gen)
+	chromosome(std::vector<std::pair<int, int>>& lessonTeacher, std::uniform_int_distribution<long long>& distr, std::mt19937_64& gen) : chromosome()
 	{
 		for (int i = 0; i < arrSize; i++)
 		{
@@ -24,7 +30,7 @@ class chromosome {
 		}
 	}
 
-	chromosome(std::pair<int, int>* genes1, int size1, std::pair<int, int>* genes2)
+	chromosome(std::pair<int, int>* genes1, int size1, std::pair<int, int>* genes2): chromosome()
 	{
 		for (int i = 0; i < size1; i++)
 		{
@@ -38,7 +44,10 @@ class chromosome {
 	}	
 
 	std::pair<int, int> curriculum[arrSize];
-	
+	std::map<int, bool> passedConstraints;
+	// possibly make id to constraint correlation with string table
+	long long percent=0;
+	long long satisfyLessonHoursScore = 0;
 	void addScore(long long score);
 	long long getScore() const;
 	void setDistribution(long long val);

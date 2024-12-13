@@ -18,8 +18,10 @@ reference_value = 3*3*19 # total lessons * classesPerGrade * grades
 #reference_value = 3*6 #simpleLessons
 max_best_score = np.max(best_score)
 
+# max_best_score =  #add it from results
+
 # Calculate the percentage of each maximum score compared to the reference value
-percentage_best = (max_best_score**(1/6) / reference_value) * 100
+percentage_best = ((max_best_score/10000000)**(1/6) / 1) * 100
 
 # Output the comparison
 print(f"Maximum Best Score: {max_best_score}")

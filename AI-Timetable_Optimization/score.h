@@ -17,3 +17,8 @@ void debugHoursPerDay(int cls, int grade, const int hoursPerDay[], int nDaysPerW
 double teachSimilarHoursPerWeek(chromosome*, json& teachers);
 double calculateAllLessonHourSpreadScore(chromosome* chrom, json& lessons);
 double isLessonHoursSpreadIdeal(const std::vector<int>& hoursPerDay, int totalHours);
+
+class score {
+public:
+	static long long scoreRange;
+};

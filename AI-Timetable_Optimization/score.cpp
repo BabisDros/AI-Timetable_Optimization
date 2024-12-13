@@ -1,18 +1,18 @@
 #include "score.h"
 #include <string>
-
+long long score::scoreRange = 10000000LL;
 void scoreCalculation(chromosome* chrom, json& lessons, json& teachers) {
 
     long long totalScore = 0;
 
     // each lesson must appear x,y,z times for all classes, variable scoring
-    // totalScore += calculateSatisfyLessonHoursScore(chrom, lessons);
+ //    totalScore += calculateSatisfyLessonHoursScore(chrom, lessons);
 
     // each teacher can not teach more than the daily/weekly limit, static scoring
-//    totalScore += calculateDailyWeeklyLimitScore(chrom, teachers);
+ //   totalScore += calculateDailyWeeklyLimitScore(chrom, teachers);
 
     // a teacher can't be at the same time in 2 different classes, static scoring
-//    totalScore += calculateTeacherConflictScore(chrom);
+ //   totalScore += calculateTeacherConflictScore(chrom);
 
     // no free periods between classes, variable scoring
 //    totalScore += calculateNoFreePeriodsScore(chrom);
@@ -21,13 +21,13 @@ void scoreCalculation(chromosome* chrom, json& lessons, json& teachers) {
 //    totalScore += calculateConsecutiveHoursScore(chrom);
 
     // each class hours per day total should be uniformly spread out throughout the week, variable scoring
-//    totalScore += calculateAverageUniformityScore(chrom);
+ //   totalScore += calculateAverageUniformityScore(chrom);
 
     // each lesson for each class should be uniformly spread out throughout the week, static scoring
     totalScore += calculateAllLessonHourSpreadScore(chrom, lessons);
 
     // all teachers should teach around the same hours per week, variable scoring
-//    totalScore += teachSimilarHoursPerWeek(chrom, teachers);
+ //   totalScore += teachSimilarHoursPerWeek(chrom, teachers);
 
    chrom->addScore(totalScore);
 }
@@ -88,11 +88,14 @@ double calculateSatisfyLessonHoursScore(chromosome* chrom, json& lessons) {
         }
     }
 
-    score = (long long) (pow(evalVariance, 6));
+    score = (long long) (pow(evalVariance/total, 6) * score::scoreRange);
 
     if (evalVariance == total) // all lessons appear the specified hours
-    {} // should inform the algorithm
-     // higher priority
+    {
+        score *= 10;
+        chrom->passedConstraints[0] = true;
+    }
+    chrom->percent = score;
     return score;
 }
 
@@ -152,8 +155,8 @@ double calculateDailyWeeklyLimitScore(chromosome* chrom, json& teachers) {
             nBelowLimit++; // or more
         total++;// increase by same amount
     }
-    
-    return (nBelowLimit != total) ? 0 : 1000;
+    if (nBelowLimit == total) chrom->passedConstraints[1] = true;
+    return (nBelowLimit != total) ? 0 : score::scoreRange;
 }
 
 double calculateTeacherConflictScore(chromosome* chrom) {
@@ -173,18 +176,15 @@ double calculateTeacherConflictScore(chromosome* chrom) {
                     int teacherID = chrom->curriculum[index].second;
 
                     // Check if teacher is already teaching
-                    // .find() returns .end() if the element is not found
-                    if (teacherSet.find(teacherID) == teacherSet.end()) {
-                        teacherSet.insert(teacherID);
-                    } else {
+                    // .second is false if it already exists
+                    if (!teacherSet.insert(teacherID).second)
                         conflicts++;
-                    }
                 }
             }
         }
     }
-
-    return (conflicts>0) ? 0 : 1000;
+    if (conflicts == 0) chrom->passedConstraints[2] = true;
+    return (conflicts>0) ? 0 : score::scoreRange;
 }
 
 double calculateNoFreePeriodsScore(chromosome* chrom) {
@@ -212,10 +212,11 @@ double calculateNoFreePeriodsScore(chromosome* chrom) {
 
     // score
     int valid = total - freePeriodsBetweenClasses;
-    double proportion = (double) valid / total;
-    int score = (int) (pow((proportion), 2) * 800);
+    long double proportion = (long double) valid / (long double)total;
+    long long score = (pow((proportion), 4) * score::scoreRange);
     if (freePeriodsBetweenClasses == 0) {
-        score = 1000;
+        score = score::scoreRange;
+        chrom->passedConstraints[3] = true;
     }
 
     return score;
@@ -242,10 +243,11 @@ double calculateConsecutiveHoursScore(chromosome* chrom) {
 
     // score
     int valid = totalLessons - moreThanThreeHours;
-    double proportion = (double) valid / totalLessons;
-    int score = (int) (pow((proportion), 2) * 800);
+    long double proportion = (long double) valid / (long double) totalLessons;
+    long long score = (pow((proportion), 4) * score::scoreRange);
     if (moreThanThreeHours == 0) {
-        score = 1000;
+        score = score::scoreRange;
+        chrom->passedConstraints[4] = true;
     }
 
     return score;
@@ -284,9 +286,13 @@ double calculateAverageUniformityScore(chromosome* chrom) {
 
     // average uniformity score.
     int totalClasses = nClassesPerGrade * nGrades;
-    double averageUniformity = totalUniformityScore / totalClasses;
-    double finalScore = pow(averageUniformity, 2) * 800;
-    if (averageUniformity == 1.0) finalScore = 1000;
+    long double averageUniformity = (long double) totalUniformityScore / (long double) totalClasses;
+    long long finalScore = pow(averageUniformity, 4) * score::scoreRange;
+    if (averageUniformity == 1.0L)
+    {
+        finalScore = score::scoreRange;
+        chrom->passedConstraints[5] = true;
+    }
 
     return finalScore;
 }
@@ -346,16 +352,17 @@ double teachSimilarHoursPerWeek(chromosome* chrom, json& teachers) {
         if (maxHPerWeek > overallMaxHoursPerWeek) overallMaxHoursPerWeek = maxHPerWeek;
     }
 
-    double maxHours = *std::max_element(std::begin(intensity), std::end(intensity));
-    double minHours = *std::min_element(std::begin(intensity), std::end(intensity));
-    double diff = maxHours - minHours;
+    long double maxHours = *std::max_element(std::begin(intensity), std::end(intensity));
+    long double minHours = *std::min_element(std::begin(intensity), std::end(intensity));
+    long double diff = maxHours - minHours;
 
     int maxPossibleDiff = overallMaxHoursPerWeek;
-    double score = (1.0 - (static_cast<double>(diff) / maxPossibleDiff)); // between 0 and 1
+    long double score = (1.0 - ((diff) / maxPossibleDiff)); // between 0 and 1
     
-    int finalScore = (int) (pow((score), 2) * 800);
+    long long finalScore = (pow((score), 4) * score::scoreRange);
     if (diff == 0) {
-        finalScore = 1000;
+        finalScore = score::scoreRange;
+        chrom->passedConstraints[6] = true;
     }
     return finalScore;
 }
@@ -364,12 +371,23 @@ double calculateAllLessonHourSpreadScore(chromosome* chrom, json& lessons) {
     // Teaching hours for each lesson in each class should be uniformly spread out throughout the week
     int totalIdealSpread = 0;
     int totalConsidered = 0; // cls * grades * lessons
-
+    std::string classYear[3] = { "A", "B", "C" };
     for (auto lesson : lessons.items()) {
         int lessonID = std::stoi(lesson.key());
-        int maxHoursGradeA = lesson.value()["classes"][0]["hours"];
-        int maxHoursGradeB = lesson.value()["classes"][1]["hours"];
-        int maxHoursGradeC = lesson.value()["classes"][2]["hours"];
+        bool found = false;
+        int maxHoursGradeA = 0;
+        int maxHoursGradeB = 0;
+        int maxHoursGradeC = 0;
+        for (int k = 0; k < lesson.value()["classes"].size(); k++)
+        {
+            std::string val = lesson.value()["classes"][k]["year"];
+            if (val == classYear[0])
+                maxHoursGradeA = lesson.value()["classes"][k]["hours"];
+            else if (val == classYear[1])
+                maxHoursGradeB = lesson.value()["classes"][k]["hours"];
+            else if (val == classYear[2])
+                maxHoursGradeC = lesson.value()["classes"][k]["hours"];
+        }
 
         // Calculate lesson hour spread score for all unique classes (cls, grade)
         for (int grade = 0; grade < chrom->nGrades; grade++) {
@@ -389,7 +407,12 @@ double calculateAllLessonHourSpreadScore(chromosome* chrom, json& lessons) {
     }
 
     // Between 0 and 1000 based on how many lessons have a uniform spread of hours for each (cls, grade)
-    double score = static_cast<double>(totalIdealSpread) / (totalConsidered) * 1000;
+    long long score = pow((long double) (totalIdealSpread) / (long double)(totalConsidered), 4) *score::scoreRange;
+    if (totalIdealSpread == totalConsidered)
+    {
+        score = score::scoreRange;
+        chrom->passedConstraints[7] = true;
+    }
     return score;
 }
 
