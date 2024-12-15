@@ -187,13 +187,7 @@ public class FOL
 	}
 
 	public static void main(String[] args)
-	{
-		// color option from :
-		// https://www.tutorialspoint.com/how-to-print-colored-text-in-java-console#:~:text=Step%2D1%3A%20Create%20ANSI%20escape,formatting%20to%20its%20original%20condition.
-		String RESET = "\u001B[0m";
-		String RED_TEXT = "\u001B[31m";
-		String GREEN_TEXT = "\u001B[32m";
-		
+	{	
 		FOLLoader loader = new FOLLoader();	
 
 		FOL fol = new FOL();
@@ -237,11 +231,11 @@ public class FOL
 								
 					if (answer != null)
 					{
-						System.out.println(GREEN_TEXT + "True" + RESET + " answer: " + answer);
+						System.out.println("True" + " answer: " + answer);
 					}
 					else
 					{
-						System.out.println(RED_TEXT + "False" + RESET);
+						System.out.println("False");
 					}
 				}
 			}
