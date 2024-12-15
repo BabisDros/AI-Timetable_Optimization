@@ -1,6 +1,5 @@
 package ai;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,20 +9,20 @@ import java.util.Set;
 
 public class FOL
 {
-
-	int counter = 1;
+	
+	Standarize standarize=new Standarize();
 
 	public Map<String, String> fc_Ask(Set<Implication> KB, Implication a)
 	{
 		while (true)
 		{
 			// resetCounter
-			counter = 1;
+			standarize.resetCounter();
 			Set<Implication> newSentences = new HashSet<>();
 
 			for (Implication currentImplication : KB)
 			{
-				standarizeVariable(currentImplication);
+				standarize.newVars(currentImplication);
 				Map<String, String> substitutions = findImplicationMatch(currentImplication, KB);
 
 				// there is an available substitution for current implication
@@ -57,7 +56,6 @@ public class FOL
 					{
 						newSentences.add(newSentence);
 						
-						Map<String, String> totalSubstitutions = new HashMap<>();
 						// if currentConclusion matches input from user
 						if (newFact.getName().equals(a.getConclusionPredicate().getName()))
 						{
@@ -158,7 +156,6 @@ public class FOL
 						{
 							canUnify = false;
 							foundMatchForPredicate = false;
-							System.out.println("Ca");
 							// return new HashMap<String, String>();
 							break;
 						}
@@ -239,21 +236,7 @@ public class FOL
 		return foundMatchForPredicate;
 	}
 
-	void standarizeVariable(Implication implication)
-	{
-		if (implication.isFact())
-			return;
-
-		List<Predicate> premisePredicates = implication.getPremisePredicates();
-
-//		System.out.print(false);
-		for (Predicate predicate : premisePredicates)
-		{
-			predicate.increaseVariableName(counter);
-		}
-		implication.getConclusionPredicate().increaseVariableName(counter);
-		counter++;
-	}
+	
 
 	public static void main(String[] args)
 	{
