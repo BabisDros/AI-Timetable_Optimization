@@ -81,51 +81,71 @@ public class PL_FC_Entails
 
 	public static void main(String[] args)
 	{
-		String filename = "horn_clauses.txt";
-		Set<ImplicationForm> kB = ReadHornFromTxt.readHornClauses(filename);
-		for (ImplicationForm implication : kB)
-		{
-			System.out.println("Premise: " + implication.getPremise());
-			System.out.println("Conclusion: " + implication.getConclusion());
-			System.out.println("");
-		}
+		// color option from :
+		// https://www.tutorialspoint.com/how-to-print-colored-text-in-java-console#:~:text=Step%2D1%3A%20Create%20ANSI%20escape,formatting%20to%20its%20original%20condition.
+		String RESET = "\u001B[0m";
+		String RED_TEXT = "\u001B[31m";
+		String GREEN_TEXT = "\u001B[32m";
+
+		String defaultFilename = "horn_clauses.txt";
+
+		String option, input, inputFileName;
 
 		try (Scanner keyboard = new Scanner(System.in))
 		{
 			while (true)
 			{
-				System.out.print("Εισάγετε τον τύπο προς απόδειξη: ");
+				printMenu();
+				System.out.print("Option: ");
+				option = keyboard.nextLine();
 
-				String input = keyboard.nextLine();
-				input = input.toUpperCase();
-
-				if (input.equals("0"))
+				if (option.equals("0"))
 				{
 					System.out.println("Exiting program...");
 					break;
-
 				}
 
-				// color option from :
-				// https://www.tutorialspoint.com/how-to-print-colored-text-in-java-console#:~:text=Step%2D1%3A%20Create%20ANSI%20escape,formatting%20to%20its%20original%20condition.
-				String RESET = "\u001B[0m";
-				String RED_TEXT = "\u001B[31m";
-				String GREEN_TEXT = "\u001B[32m";
-
-				if (doesPL_FC_Entails(kB, input))
+				else if (option.equals("1"))
 				{
-					System.out.println(GREEN_TEXT + "True" + RESET);
+					Set<ImplicationForm> kB;
+					System.out.println("Please enter the file name to load (without .txt) or press enter to load default");
+
+					inputFileName = keyboard.nextLine();
+					if (inputFileName.isEmpty())
+					{
+						kB = ReadHornFromTxt.readHornClauses(defaultFilename);
+					}
+					else
+					{
+						kB = ReadHornFromTxt.readHornClauses(inputFileName + ".txt");
+					}
+
+					System.out.println("Enter the Symbol (accepted format:e.g Q): ");
+					input = keyboard.nextLine();
+					input = input.toUpperCase();
+
+					if (doesPL_FC_Entails(kB, input))
+					{
+						System.out.println(GREEN_TEXT + "True" + RESET);
+					}
+					else
+					{
+						System.out.println(RED_TEXT + "False" + RESET);
+					}
 				}
-				else
-				{
-					System.out.println(RED_TEXT + "False" + RESET);
-					System.out.println("Εισάγετε νέο τυπο ή 0 για έξοδο");
-				}
+
 			}
 
 			keyboard.close();
 		}
 		System.exit(0);
 
+	}
+
+	public static void printMenu()
+	{
+		System.out.println("\nWhat would you like to do?");
+		System.out.println("0. Exit");
+		System.out.println("1. Enter a Symbol to prove");
 	}
 }
