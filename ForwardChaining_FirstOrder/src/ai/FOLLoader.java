@@ -231,7 +231,6 @@ public class FOLLoader
 	    }
 	    return predicate;
 	}
-
 }
 
 
