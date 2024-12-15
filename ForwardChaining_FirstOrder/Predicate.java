@@ -1,5 +1,3 @@
-package ai;
-
 import java.util.*;
 
 class Predicate

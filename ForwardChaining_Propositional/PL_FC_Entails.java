@@ -1,4 +1,3 @@
-package ai;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -120,7 +119,7 @@ public class PL_FC_Entails
 
 					if (doesPL_FC_Entails(kB, input))
 					{
-						System.out.println( "True");
+						System.out.println("True");
 					}
 					else
 					{

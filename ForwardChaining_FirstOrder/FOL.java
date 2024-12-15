@@ -1,5 +1,3 @@
-package ai;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -187,7 +185,7 @@ public class FOL
 	}
 
 	public static void main(String[] args)
-	{	
+	{		
 		FOLLoader loader = new FOLLoader();	
 
 		FOL fol = new FOL();
@@ -231,7 +229,7 @@ public class FOL
 								
 					if (answer != null)
 					{
-						System.out.println("True" + " answer: " + answer);
+						System.out.println("True" +" answer: " + answer);
 					}
 					else
 					{

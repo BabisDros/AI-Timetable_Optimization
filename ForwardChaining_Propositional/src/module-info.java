@@ -1,3 +1,0 @@
-module ForwardChaining_Propositional
-{
-}
