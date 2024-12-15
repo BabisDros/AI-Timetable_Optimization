@@ -191,6 +191,47 @@ public class FOLLoader
 		}
 	}
 	
+	
+	
+	public Predicate convertInput(String input)
+	{
+	
+	    // Επαλήθευση ότι η είσοδος δεν είναι κενή
+	    if (input == null || input.isEmpty())
+	    {
+	  
+	        return null;
+	    }
+
+	    // Διαχωρισμός ονόματος και παραμέτρων
+	    String[] nameAndTerms = input.split("\\(", 2); // Διαχωρισμός στο πρώτο '('
+	    if (nameAndTerms.length != 2 || !nameAndTerms[1].endsWith(")"))
+	    {
+	  
+	    	return null;	    }
+
+	    String name = nameAndTerms[0]; // Το όνομα του predicate
+	    String args = nameAndTerms[1].substring(0, nameAndTerms[1].length() - 1); // Αφαιρούμε το ')'
+
+	    // Δημιουργία αντικειμένου Predicate
+	    Predicate predicate = new Predicate(name,false);
+
+	    // Διαχωρισμός παραμέτρων
+	    String[] terms = args.split(",");
+	    for (String term : terms)
+	    {
+	        term = term.trim(); 
+	        if (term.isEmpty())
+	        {
+	     
+	        	return null;
+	        }
+
+	        predicate.getTerms().add(new Term(term));
+	    }
+	    return predicate;
+	}
+
 }
 
 

@@ -22,6 +22,13 @@ class Term
 			this.isVariable = true;
 		}
 	}
+	
+	//copy constructor
+	Term(Term other)
+    {
+        this.name = other.name; 
+        this.isVariable = other.isVariable;
+    }
 
 	public void increaseCounterInName(int counter)
 	{

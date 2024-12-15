@@ -8,17 +8,17 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
-
 public class FOL
 {
 
-	int counter=1;
+	int counter = 1;
+
 	public Map<String, String> fc_Ask(Set<Implication> KB, Implication a)
 	{
 		while (true)
 		{
-			//resetCounter 
-			counter=1;
+			// resetCounter
+			counter = 1;
 			Set<Implication> newSentences = new HashSet<>();
 
 			for (Implication currentImplication : KB)
@@ -26,35 +26,40 @@ public class FOL
 				standarizeVariable(currentImplication);
 				Map<String, String> substitutions = findImplicationMatch(currentImplication, KB);
 
-				//there is an available substitution for current implication
+				// there is an available substitution for current implication
 				if (substitutions.size() > 0)
 				{
 					System.out.println("current impl: " + currentImplication + "subs:" + substitutions);
 
-					
-					Predicate conclusion = currentImplication.getConclusionPredicate();
+					Predicate newFact = new Predicate(currentImplication.getConclusionPredicate());
+
 					// replace variables in conclusion
-					List<Term> conclusionTerms = conclusion.getTerms();
+					List<Term> conclusionTerms = newFact.getTerms();
 					for (Map.Entry<String, String> entry : substitutions.entrySet())
 					{
 //			            System.out.println("Key: " + entry.getKey() + ", Value: " + entry.getValue());
 						for (Term term : conclusionTerms)
 						{
+							
 							if (term.name.equals(entry.getKey()))
 							{
+								term.isVariable=false;
 								term.name = entry.getValue();
 							}
 						}
 					}
-					System.out.println(currentImplication.getConclusionPredicate());
+					// print to check correct substitution
+					System.out.println(newFact);
 
-					Implication newSentence = new Implication(conclusion);
-					if (findPredicateMatch(conclusion, KB) && !findPredicateMatch(conclusion, newSentences))
+					Implication newSentence = new Implication(newFact);
+					if (!findPredicateMatch(newFact, KB) && !findPredicateMatch(newFact, newSentences))
+//					if (!KB.contains(newSentence) && !newSentences.contains(newSentence))
 					{
 						newSentences.add(newSentence);
-
-						// if currentConclusion matches input
-						if (conclusion.getName().equals(a.getConclusionPredicate().getName()))
+						
+						Map<String, String> totalSubstitutions = new HashMap<>();
+						// if currentConclusion matches input from user
+						if (newFact.getName().equals(a.getConclusionPredicate().getName()))
 						{
 
 							// check if their terms can be unified
@@ -83,6 +88,7 @@ public class FOL
 							{
 //								System.out.println(implication + "=========  PRED: " + currentPredicate + " subs: "
 //										+ unifier.substitutions);
+								System.out.println("Subs: "+unifier.substitutions);
 								return unifier.substitutions;
 							}
 						}
@@ -94,14 +100,23 @@ public class FOL
 //			{
 //				System.out.println(implication+" size:"+implication.getPremisePredicates().size());
 //			}
-		
+
+			}
+			System.out.println("\nSTART current facts ");
+			for(Implication currentImplication : KB)
+			{
+				
+				if(currentImplication.isFact())
+					System.out.println(currentImplication);
+				
 			}
 			
-			if(newSentences.isEmpty())
+			System.out.println("END current facts \n");
+			if (newSentences.isEmpty())
 			{
 				return null;
 			}
-			
+
 			KB.addAll(newSentences);
 		}
 
@@ -118,15 +133,13 @@ public class FOL
 		{
 
 			boolean foundMatchForPredicate = false;
-			
-			//Compare current predicate with facts in KB
+
+			// Compare current predicate with facts in KB
 			for (Implication otherImplication : KB)
 			{
 				if (otherImplication.isFact()
 						&& otherImplication.getConclusionPredicate().getName().equals(currentPredicate.getName()))
 				{
-
-					
 					foundMatchForPredicate = true;
 					// check if their terms can be unified
 					List<Term> otherImplicationTerms = otherImplication.getConclusionPredicate().getTerms();
@@ -233,12 +246,13 @@ public class FOL
 
 		List<Predicate> premisePredicates = implication.getPremisePredicates();
 
-		System.out.print(false);
+//		System.out.print(false);
 		for (Predicate predicate : premisePredicates)
 		{
 			predicate.increaseVariableName(counter);
 		}
 		implication.getConclusionPredicate().increaseVariableName(counter);
+		counter++;
 	}
 
 	public static void main(String[] args)
@@ -252,8 +266,7 @@ public class FOL
 //			System.out.println(implication+" size:"+implication.getPremisePredicates().size());
 //		}
 		FOL fol = new FOL();
-		
-		
+
 		try (Scanner keyboard = new Scanner(System.in))
 		{
 			while (true)
@@ -261,7 +274,6 @@ public class FOL
 				System.out.print("Εισάγετε τον τύπο προς απόδειξη: ");
 
 				String input = keyboard.nextLine();
-				
 
 				if (input.equals("0"))
 				{
@@ -276,13 +288,14 @@ public class FOL
 				String RED_TEXT = "\u001B[31m";
 				String GREEN_TEXT = "\u001B[32m";
 
-				Predicate inputPredicate=new Predicate(input, false);
+				Predicate inputPredicate = loader.convertInput(input);
 				Implication inputSentence = new Implication(inputPredicate);
-				
-				Map<String, String> answer= fol.fc_Ask(loader.KB, inputSentence);
-				if (answer!=null)
+
+				System.out.println("INPUT PREDICATE"+ inputPredicate.getTerms());
+				Map<String, String> answer = fol.fc_Ask(loader.KB, inputSentence);
+				if (answer != null)
 				{
-					System.out.println(GREEN_TEXT + "True" + RESET);
+					System.out.println(GREEN_TEXT + "True" + RESET+" answer: "+answer);
 				}
 				else
 				{

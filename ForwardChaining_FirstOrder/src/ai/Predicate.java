@@ -21,6 +21,20 @@ class Predicate
 		this.terms = terms;
 		this.isNegated = isNegated;
 	}
+	
+	public Predicate(Predicate other)
+	{
+	    this.name = other.getName();
+	    this.isNegated = other.isNegated;
+	    if(other.getTerms().isEmpty())
+	    	return;
+	    this.terms = new ArrayList<>();
+        for (Term term : other.terms)
+        {
+            this.terms.add(new Term(term));
+        }
+
+	}
 
 	public List<Term> getTerms()
 	{
