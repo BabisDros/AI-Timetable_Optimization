@@ -195,35 +195,35 @@ public class FOLLoader
 	
 	public Predicate convertInput(String input)
 	{
-	
-	    // Επαλήθευση ότι η είσοδος δεν είναι κενή
-	    if (input == null || input.isEmpty())
+	    if (input.isEmpty())
 	    {
-	  
 	        return null;
 	    }
 
-	    // Διαχωρισμός ονόματος και παραμέτρων
-	    String[] nameAndTerms = input.split("\\(", 2); // Διαχωρισμός στο πρώτο '('
+	    
+	    input=input.trim();
+	    
+	    //Will create an array with index [0] name and index [1] with all the terms and the second parenthesis
+	    String[] nameAndTerms = input.split("\\(", 2); // split by '('.
+	
 	    if (nameAndTerms.length != 2 || !nameAndTerms[1].endsWith(")"))
 	    {
-	  
-	    	return null;	    }
+	    	//invalid format
+	    	return null;	   
+	    }
 
-	    String name = nameAndTerms[0]; // Το όνομα του predicate
-	    String args = nameAndTerms[1].substring(0, nameAndTerms[1].length() - 1); // Αφαιρούμε το ')'
-
-	    // Δημιουργία αντικειμένου Predicate
+	    String name = nameAndTerms[0]; 
+	    String termsString = nameAndTerms[1].substring(0, nameAndTerms[1].length() - 1); // remove the remaining Right parenthesis
+	
 	    Predicate predicate = new Predicate(name,false);
 
-	    // Διαχωρισμός παραμέτρων
-	    String[] terms = args.split(",");
+	    String[] terms = termsString.split(",");
 	    for (String term : terms)
 	    {
 	        term = term.trim(); 
 	        if (term.isEmpty())
 	        {
-	     
+	        	//invalid format
 	        	return null;
 	        }
 
