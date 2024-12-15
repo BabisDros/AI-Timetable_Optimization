@@ -27,7 +27,7 @@ public class ReadHornFromTxt
 					continue;
 				}
 
-				// Check validity of horn. If invalid, skip to next line.
+				// Check validity of current clause. If invalid, skip to next line.
 				if (!isValidHornClause(line))
 				{
 					System.out.println("Clause in line:" + line + " is not in correct format. "
@@ -64,10 +64,11 @@ public class ReadHornFromTxt
 			System.out.println("All data were read succesfully\n");
 		}
 
-		catch (IOException e)
+		catch (IOException exception)
 		{
 			System.out.println("Error reading file...\nThe program will now exit");
 			System.exit(0);
+			exception.printStackTrace();
 		}
 
 		if(implications.isEmpty())
@@ -111,7 +112,7 @@ public class ReadHornFromTxt
 		{
 			literal = literal.trim();
 
-			if (literal.isEmpty() || (!literal.startsWith("¬") && !literal.matches("[a-zA-Z0-9]+")))
+			if (literal.isEmpty() || (!literal.startsWith("¬") && !literal.matches("[A-Z0-9]+")))
 			{
 				return false;
 			}

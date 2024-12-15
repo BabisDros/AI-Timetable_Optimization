@@ -43,11 +43,14 @@ public class PL_FC_Entails
 		// main part
 		while (!agenda.isEmpty())
 		{
+
 			String p = agenda.remove();
+			if (p.equals(q))
+				return true;
 
-			Boolean isPTrue = inferred.get(p);
+			Boolean isPInferred = inferred.get(p);
 
-			if (!isPTrue)
+			if (!isPInferred)
 			{
 				inferred.put(p, true);
 
@@ -63,11 +66,12 @@ public class PL_FC_Entails
 
 					if (countElement.getValue().equals(0))
 					{
-						if (countElement.getKey().getConclusion().equals(q))
+						String conclusion = countElement.getKey().getConclusion();
+						if (conclusion.equals(q))
 						{
 							return true;
 						}
-						agenda.add(countElement.getKey().getConclusion());
+						agenda.add(conclusion);
 					}
 				}
 			}
@@ -98,30 +102,30 @@ public class PL_FC_Entails
 				if (input.equals("0"))
 				{
 					System.out.println("Exiting program...");
-	                break;
-	                
+					break;
+
 				}
-				
-				//color option from : https://www.tutorialspoint.com/how-to-print-colored-text-in-java-console#:~:text=Step%2D1%3A%20Create%20ANSI%20escape,formatting%20to%20its%20original%20condition.
+
+				// color option from :
+				// https://www.tutorialspoint.com/how-to-print-colored-text-in-java-console#:~:text=Step%2D1%3A%20Create%20ANSI%20escape,formatting%20to%20its%20original%20condition.
 				String RESET = "\u001B[0m";
-		        String RED_TEXT = "\u001B[31m";
-		        String GREEN_TEXT = "\u001B[32m";
-		        
+				String RED_TEXT = "\u001B[31m";
+				String GREEN_TEXT = "\u001B[32m";
+
 				if (doesPL_FC_Entails(kB, input))
 				{
-			        System.out.println(GREEN_TEXT+ "True" + RESET);
-					System.out.println("True");
+					System.out.println(GREEN_TEXT + "True" + RESET);
 				}
 				else
 				{
 					System.out.println(RED_TEXT + "False" + RESET);
 					System.out.println("Εισάγετε νέο τυπο ή 0 για έξοδο");
-				}				
+				}
 			}
-			
+
 			keyboard.close();
 		}
 		System.exit(0);
-		
+
 	}
 }
