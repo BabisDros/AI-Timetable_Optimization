@@ -4,7 +4,7 @@ class Term
 {
 	String name;
 	boolean isVariable;
-	int counter=1; 
+//	int counter=1; 
 	
 	Term(String name, boolean isVariable)
 	{
@@ -23,12 +23,11 @@ class Term
 		}
 	}
 
-	public void increaseCounterInName()
+	public void increaseCounterInName(int counter)
 	{
 		if(!this.isVariable)
 			return;
 		this.name=name+counter;
-		counter++;
 	}
 	
 	@Override

@@ -8,13 +8,17 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
+
 public class FOL
 {
 
+	int counter=1;
 	public Map<String, String> fc_Ask(Set<Implication> KB, Implication a)
 	{
 		while (true)
 		{
+			//resetCounter 
+			counter=1;
 			Set<Implication> newSentences = new HashSet<>();
 
 			for (Implication currentImplication : KB)
@@ -22,10 +26,12 @@ public class FOL
 				standarizeVariable(currentImplication);
 				Map<String, String> substitutions = findImplicationMatch(currentImplication, KB);
 
+				//there is an available substitution for current implication
 				if (substitutions.size() > 0)
 				{
 					System.out.println("current impl: " + currentImplication + "subs:" + substitutions);
 
+					
 					Predicate conclusion = currentImplication.getConclusionPredicate();
 					// replace variables in conclusion
 					List<Term> conclusionTerms = conclusion.getTerms();
@@ -112,12 +118,15 @@ public class FOL
 		{
 
 			boolean foundMatchForPredicate = false;
+			
+			//Compare current predicate with facts in KB
 			for (Implication otherImplication : KB)
 			{
 				if (otherImplication.isFact()
 						&& otherImplication.getConclusionPredicate().getName().equals(currentPredicate.getName()))
 				{
 
+					
 					foundMatchForPredicate = true;
 					// check if their terms can be unified
 					List<Term> otherImplicationTerms = otherImplication.getConclusionPredicate().getTerms();
@@ -135,6 +144,8 @@ public class FOL
 						if (!unifier.unify(currentTerm, otherTerm))
 						{
 							canUnify = false;
+							foundMatchForPredicate = false;
+							System.out.println("Ca");
 							// return new HashMap<String, String>();
 							break;
 						}
@@ -222,11 +233,12 @@ public class FOL
 
 		List<Predicate> premisePredicates = implication.getPremisePredicates();
 
+		System.out.print(false);
 		for (Predicate predicate : premisePredicates)
 		{
-			predicate.increaseVariableNameByOne();
+			predicate.increaseVariableName(counter);
 		}
-		implication.getConclusionPredicate().increaseVariableNameByOne();
+		implication.getConclusionPredicate().increaseVariableName(counter);
 	}
 
 	public static void main(String[] args)

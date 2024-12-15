@@ -38,11 +38,11 @@ class Predicate
 	}
 	
 
-	public void increaseVariableNameByOne()
+	public void increaseVariableName(int counter )
 	{
 		for(Term term:terms)
 		{
-			term.increaseCounterInName();
+			term.increaseCounterInName(counter);
 		}
 	}
 	@Override
