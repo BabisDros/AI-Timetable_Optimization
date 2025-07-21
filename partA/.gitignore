@@ -403,7 +403,7 @@ FodyWeavers.xsd
 
 ### Eclipse ###
 .metadata
-bin/
+#bin/
 tmp/
 *.tmp
 *.bak
@@ -468,3 +468,7 @@ local.properties
 .sts4-cache/
 
 # End of https://www.toptal.com/developers/gitignore/api/eclipse
+
+bin/*
+!bin/data_analysis/
+!bin/data/
