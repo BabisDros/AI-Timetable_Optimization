@@ -6,28 +6,28 @@ void scoreCalculation(chromosome* chrom, json& lessons, json& teachers) {
     long long totalScore = 0;
 
     // each lesson must appear x,y,z times for all classes, variable scoring
- //    totalScore += calculateSatisfyLessonHoursScore(chrom, lessons);
+    totalScore += calculateSatisfyLessonHoursScore(chrom, lessons);
 
     // each teacher can not teach more than the daily/weekly limit, static scoring
- //   totalScore += calculateDailyWeeklyLimitScore(chrom, teachers);
+    totalScore += calculateDailyWeeklyLimitScore(chrom, teachers);
 
     // a teacher can't be at the same time in 2 different classes, static scoring
- //   totalScore += calculateTeacherConflictScore(chrom);
+    totalScore += calculateTeacherConflictScore(chrom);
 
     // no free periods between classes, variable scoring
-//    totalScore += calculateNoFreePeriodsScore(chrom);
+    totalScore += calculateNoFreePeriodsScore(chrom);
 
     // a teacher shouldn't teach for more than 2 hours in a row, variable scoring
-//    totalScore += calculateConsecutiveHoursScore(chrom);
+    totalScore += calculateConsecutiveHoursScore(chrom);
 
     // each class hours per day total should be uniformly spread out throughout the week, variable scoring
- //   totalScore += calculateAverageUniformityScore(chrom);
+    totalScore += calculateAverageUniformityScore(chrom);
 
     // each lesson for each class should be uniformly spread out throughout the week, static scoring
     totalScore += calculateAllLessonHourSpreadScore(chrom, lessons);
 
     // all teachers should teach around the same hours per week, variable scoring
- //   totalScore += teachSimilarHoursPerWeek(chrom, teachers);
+    totalScore += teachSimilarHoursPerWeek(chrom, teachers);
 
    chrom->addScore(totalScore);
 }
