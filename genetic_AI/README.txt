@@ -1,14 +1,10 @@
-================ Προϋποθέσεις ================
+================ Prerequisites ================
 
-Πρέπει να είναι εγκατεστημένη η τελευταία έκδοση (τουλάχιστον 8.xx).
+Make sure the latest version of C++ (at least 8.xx) is installed.
 
-Από τον root folder, δημιουργήστε έναν φάκελο και ονομάστε τον nlohmann στον οποίο θα τοποθετήσετε το json.hpp (https://github.com/nlohmann/json/blob/develop/single_include/nlohmann/json.hpp) για να υποστηρίζονται json files.
+Download the repository
 
-Δημιουργήστε έναν φάκελο data στον οποίο θα είναι τοποθετημένα τα αρχεία lessons.json και teacher.json.
-
-Δημιουργήστε έναν φάκελο data_analysis στον οποίο θα δημιουργείται το αρχείο evaluation_metrics.csv για την δημιουργία γραφικών.
-
-Το lessons.json πρέπει να είναι της μορφής
+lessons.json expected format
 {
     "Lessons":{
         "1":{
@@ -21,7 +17,7 @@
 }
 
 
-Το teacher.json πρέπει να είναι της μορφής
+teacher.json expected format
 {
     "Teachers": {
         "1": {
@@ -32,41 +28,55 @@
         }
 }
 
+
+================ Compilation via visual studio ================
+
+Visual Studio's compiler can significantly improve performance
+Pick your hyperparameters at the top of main and simply run the file in release mode.
+
+
 ================ Εκτέλεση μέσω gcc ================
 
-Αρκεί να εκτελέσετε στο cmd την παρακάτω εντολή στο root, στο οποίο είναι όλα τα .cpp και .h files
+For this method you need to update the structure:
+
+From the root folder, create a folder named nlohmann and place the json.hpp file inside it. You can download it from:
+https://github.com/nlohmann/json/blob/develop/single_include/nlohmann/json.hpp
+This is required to enable support for JSON files.
+
+Create a folder named data, which should contain the files:
+
+    lessons.json
+
+    teacher.json
+
+Create a folder named data_analysis, where the program will generate the file:
+
+    evaluation_metrics.csv
+    This file is used for creating visualizations.
+
+Open a terminal or command prompt in the root directory (where all .cpp and .h files are located), and run:
 Windows
 g++ -O3 -std=c++17 -I. *.cpp
 Linux
 g++ -std=c++17 -I. *.cpp -ltbb
 
-================ Επιπλέον δυνατότητες ================
-Η δημιουργία φακέλων δεν είναι υποχρεωτική, μπορείτε να δώσετε το δικό σας κατάλληλο path μέσω των μεταβλητών 
+
+================ Additional Features  ================
+
+Folder creation is optional. You can specify custom paths by modifying the following variables at the top of main.cpp 
 LESSON_DATA_PATH
 TEACHER_DATA_PATH
 EVAL_METRICS_PATH
-οι οποίες βρίσκονται στην αρχή του main.cpp
 
-Μπορείτε να δώσετε το δικό σας seed, δίνοντας ένα unsigned int στην μεταβλητή seed στην αρχή του main.cpp
+You can provide a custom seed by assigning an unsigned int to the seed variable at the top of main.cpp.
 
-Επιπλέον μπορείτε να αλλάξετε τις μεταβλητές
+To speed up execution (at the cost of potentially less optimal results), modify:
 POPULATION_SIZE
 MAX_GEN
-για ταχύτερη εκτέλεση, χωρίς την επιβεβαίωση δημιουργίας optimal solution.
 
-Αφαίρεση του comment // #define DEBUG στην κορυφή του main.cpp για αναλυτικότερο output, αλλά αργότερη εκτέλεση
+To enable detailed debug output (slower execution), uncomment the line:
+    // #define DEBUG
 
-================ Εκτέλεση μέσω visual studio ================
-Ο compiler του visual studio μπορεί να επιταχύνει ραγδαία την εκτέλεση του προγράμματος
-Δημιουργήστε ένα project με cpp version 17.
-Τοποθετήστε τους φακέλους data και data_analysis σε έναν φάκελο bin στο root
-Τοποθετήστε τον φάκελο nlohmann σε έναν φάκελο include
-Αφού προσθέσετε τα hpp και cpp αρχεία, βεβαιωθείτε ότι ισχύουν οι παρακάτω ρυθμίσεις στα project properties (alt + enter)
 
-General>OutputDirectory: $(SolutionDir)bin
-General>C++ Language Standard: ISO C++17 Standard (/std:c++17)
-Debugging>Working Directory: $(SolutionDir)bin
-C/C++>General>Additional Include Directories: $(SolutionDir)include
-
-Αφού σιγουρευτείτε ότι είστε σε Release πιέστε ctrl + shift + B για να κάνετε compile
-Τέλος αρκεί η εκτέλεση του αρχείου .exe από το bin
+================ Special thanks ================
+Json.hpp (https://github.com/nlohmann/json/blob/develop/single_include/nlohmann/json.hpp) was used for json support.

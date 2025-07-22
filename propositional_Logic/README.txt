@@ -1,56 +1,64 @@
-Κοινές διαδικασίες.
-1. Πρέπει να είναι αποσυμπιεσμένος ο φάκελος που περιέχει τα java αρχεία.
+Prerequisites 
 
-Για το ForwardChaining_FirstOrder:
-2. Από cmd κάνετε πλοήγηση στον φάκελο που περιέχει τα java αρχεία με τη εντολή cd (αν δεν έχετε αλλάξει όνομα φακέλου, η τοποθεσία θα είναι της μορφής *\ForwardChaining_FirstOrder).
-3. Τρέχετε javac FOL.java
-4. Τρέχετε java FOL
-5. Θα εμφανίσει το παρακάτω μήνυμα με 2 επιλογές:
+1. Download the repository
+
+For ForwardChaining_FirstOrder:
+2. Open a Command Prompt (cmd) and navigate to the folder containing the Java files using the cd command. If you haven’t renamed the folder, the path will be something like:
+        ...\ForwardChaining_FirstOrder
+3. Compile with 
+        javac FOL.java
+4. run with 
+        java FOL
+5. You will see the following menu:
         What would you like to do?
         0. Exit
         1. Enter a sentence to prove
 
-6. Αν επιλέξετε το 1
-        1. Μπορείτε να εισάγετε το όνομα ενός αρχείου χωρίς την κατάληξη ".txt" ή να πατήσετε απευθείας enter και θα φορτώσει το αρχείο που είναι μέσα στον φάκελο με το συγκεκριμένο όνομα: KB_FOL.txt.
+6. If you choose Option 1:
+        1. You will be prompted to enter a filename (without the .txt extension), or simply press Enter to load the default file: KB_FOL.txt
 
-        2. Το αρχείο θα πρέπει να έχει τις προτάσεις της ΒΓ με μορφή: 
+        2. The file must contain knowledge base (KB) rules in the following format:
                 NOTMissile(x) OR NOTOwns(Nono, x) OR Sells(West, x, Nono)
                 NOTMissile(x) OR Weapon(x)
                 NOTEnemy(x, America) OR Hostile(x)
 		...
-                Θα πρέπει:
-                1. Η κάθε πρόταση σε ξεχωριστή γραμμή.
-                2. Το OR να είναι κεφαλαίο και να έχει κενά δεξιά και αριστερά του. " OR ".
-                3. Το NOT όλα κεφαλαία, ακριβώς πριν το όνομα του predicate χωρίς κενό.
-                4. Sells(West, x, Nono): οι σταθερές ή μεταβλητές να χωρίζονται με κόμμα και μετά το κόμμα κενό.
+                Rules for formatting:
+                1. Each sentence must be on a separate line.
+                2. OR must be written in uppercase with spaces on both sides: " OR ".
+                3. NOT must be in uppercase, directly before the predicate name (no space).
+                4. Arguments (constants or variables) must be comma-separated with a space after each comma, e.g.,
+                        Sells(West, x, Nono)
 
-        3. Θα σας εμφανίσει προτροπή να εισάγετε την πρόταση. Θα πρέπει το predicate να είναι με το παρακάτω format:
-		Missile(x) ή αν έχει παραπάνω μεταβλητές οπως περιγράφεται στο 4 παραπάνω.
+        3. Next, you’ll be prompted to enter a query, which must follow the same format, e.g.:
+		Missile(x) or with more variables, just like number 4 above.
 
 ===============================================================================================================================
 
-Για το ForwardChaining_Propositional:
-2. Από cmd κάνετε πλοήγηση στον φάκελο που περιέχει τα java αρχεία με cd 
-        (αν δεν έχετε αλλάξει όνομα φακέλου, η τοποθεσία θα είναι της μορφής *\ForwardChaining_Propositional).
-3. Τρέχετε: javac PL_FC_Entails.java
-4. Τρέχετε: java PL_FC_Entails
-5. Θα εμφανίσει το παρακάτω μήνυμα με 2 επιλογές:
+For ForwardChaining_Propositional:
+2. Open a Command Prompt (cmd) and navigate to the folder containing the Java files using cd. If you haven’t renamed the folder, the path will be something like:
+        ...\ForwardChaining_Propositional
+3. Compile with
+        javac PL_FC_Entails.java
+4. Run with
+        java PL_FC_Entails
+5. You will see the following menu:
         What would you like to do?
         0. Exit
         1. Enter a sentence to prove
 
-6. Αν επιλέξετε το 1
-        1. Στη συνέχεια μπορείτε να εισάγετε το όνομα ενός αρχείου χωρίς την κατάληξη ".txt" ή να πατήσετε απευθείας enter και θα φορτώσει το αρχείο που είναι μέσα στον φάκελο με το συγκεκριμένο όνομα: horn_clauses.txt .
+6. If you choose Option 1:
+        1. You can enter a filename (without the .txt extension), or press Enter to load the default file: horn_clauses.txt
 
-        2. Το αρχείο θα πρέπει να έχει τις προτάσεις της ΒΓ με μορφή: 
-                (¬P∨Q) χωρίς καθόλου κενά
+        2. The file must contain propositional logic rules in the following format:
+                (¬P∨Q)
                 (¬L∨¬M∨P)
                 ..
 
-		Θα πρέπει:
-                1. Η κάθε πρόταση σε ξεχωριστή γραμμή.
-                2. Να μην υπάρχουν κενά ανάμεσα στα σύμβολα της πρότασης.
-                3. Τα ειδικά σύμβολα μπορούν να αντιγραφούν από εδώ για ευκολία.
+		Rules for formatting:
+                1. Each sentence must be on a separate line.
+                2. No spaces are allowed between symbols.
+                3. You can copy and paste special characters (e.g., ¬, ∨) from this document for convenience.
+                        (Beware V != ∨)
 
-        3. Θα σας εμφανίσει προτροπή να εισάγετε την πρόταση. Θα πρέπει το predicate να είναι με το παρακάτω format:
+        3. You will then be prompted to enter a query, using the same symbol format, e.g.:
                 Q
