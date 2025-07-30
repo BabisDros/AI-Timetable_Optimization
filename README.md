@@ -52,3 +52,6 @@ Refer to our guides for the [genetic algorithm](genetic_AI/README.txt) and the [
 <a href="https://github.com/BabisDros/AI-Timetable_Optimization/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=BabisDros/AI-Timetable_Optimization"/>
 </a>
+
+- [Babis Drosatos](https://github.com/BabisDros)
+- [Iosif Petroulakis](https://github.com/Morthlog)
