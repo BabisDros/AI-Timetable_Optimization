@@ -48,6 +48,9 @@ A higher score *can* be achieved by increasing the population size and the numbe
 ## How to run
 Refer to our guides for the [genetic algorithm](genetic_AI/README.txt) and the [propositional logic](propositional_Logic/README.txt)
 
+## Reports
+You can check our full reports for the [genetic algorithm](<genetic_AI/part A report.pdf>) and the [propositional logic](<propositional_Logic/part B report.pdf>)
+
 ## Contributors
 <a href="https://github.com/BabisDros/AI-Timetable_Optimization/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=BabisDros/AI-Timetable_Optimization"/>
